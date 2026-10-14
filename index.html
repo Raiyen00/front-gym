@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymSasS — Acceso y Registro</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.25rem;
+      background-color: var(--bg-app);
+      background-image: 
+        radial-gradient(ellipse 65% 50% at 50% -10%, rgba(16, 185, 129, 0.14), transparent),
+        radial-gradient(ellipse 40% 40% at 50% 115%, rgba(59, 130, 246, 0.06), transparent);
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-logo-centered {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .brand-logo-centered .brand-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+    }
+
+    .brand-logo-centered .brand-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .auth-brand p {
+      margin-top: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .auth-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-card-header {
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+
+    .auth-card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+
+    .auth-card-header p {
+      font-size: 0.825rem;
+      color: var(--text-secondary);
+    }
+
+    /* Estado de Sesión Activa */
+    .session-view {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .session-badge-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-full);
+      background-color: var(--primary-subtle);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 auto 1rem auto;
+    }
+
+    .session-details {
+      background-color: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin: 1.25rem 0;
+      text-align: left;
+    }
+
+    .session-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.825rem;
+    }
+
+    .session-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .session-item .label {
+      color: var(--text-muted);
+    }
+
+    .session-item .value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .session-token-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: left;
+      margin-top: 1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .session-token-box {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.725rem;
+      color: var(--primary);
+      word-break: break-all;
+      text-align: left;
+      max-height: 65px;
+      overflow-y: auto;
+      margin-bottom: 1.25rem;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-container">
+      
+      <!-- Marca y Título Central -->
+      <div class="auth-brand">
+        <a href="index.html" class="brand-logo-centered">
+          <div class="brand-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 16.5l-3 3 1.5 1.5 3-3m10.5-10.5l3-3-1.5-1.5-3 3M7.5 15l9-9m-5 9l-2-2 7-7 2 2-7 7z"/>
+            </svg>
+          </div>
+          <span>GymSasS</span>
+        </a>
+        <p>Sistema de Gestión deportiva y control de socios</p>
+      </div>
+
+      <!-- Tarjeta Principal -->
+      <div class="auth-card">
+
+        <!-- VISTA 1: FORMULARIOS DE LOGIN Y REGISTRO -->
+        <div id="view-auth-forms">
+          <!-- Selector Segmentado de Modo -->
+          <div class="segmented-control">
+            <button type="button" class="segmented-btn active" data-tab="tab-login">
+              Iniciar sesión
+            </button>
+            <button type="button" class="segmented-btn" data-tab="tab-register">
+              Registrar socio
+            </button>
+          </div>
+
+          <!-- Pestaña 1: Iniciar Sesión (POST /auth/login) -->
+          <div id="tab-login" class="tab-pane active">
+            <div class="auth-card-header">
+              <h2>Ingreso al sistema</h2>
+              <p>Completá tus credenciales para acceder a tu cuenta</p>
+            </div>
+
+            <div id="login-alert" class="d-none"></div>
+
+            <form id="login-form">
+              <div class="form-group">
+                <label for="login-email" class="form-label">Correo electrónico</label>
+                <input 
+                  type="email" 
+                  id="login-email" 
+                  class="form-control" 
+                  placeholder="ejemplo@gymsass.com" 
+                  required 
+                  autocomplete="email"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="login-password" class="form-label">Contraseña</label>
+                <input 
+                  type="password" 
+                  id="login-password" 
+                  class="form-control" 
+                  placeholder="••••••••" 
+                  required 
+                  autocomplete="current-password"
+                >
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block mt-4">
+                Ingresar al sistema
+              </button>
+            </form>
+          </div>
+
+          <!-- Pestaña 2: Registro de Socio (POST /usuarios) -->
+          <div id="tab-register" class="tab-pane">
+            <div class="auth-card-header">
+              <h2>Alta de nuevo socio</h2>
+              <p>Registrá tus datos personales para darte de alta en el gimnasio</p>
+            </div>
+
+            <div id="register-alert" class="d-none"></div>
+
+            <form id="register-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reg-nombre" class="form-label">Nombre</label>
+                  <input type="text" id="reg-nombre" class="form-control" placeholder="Juan" required>
+                </div>
+                <div class="form-group">
+                  <label for="reg-apellido" class="form-label">Apellido</label>
+                  <input type="text" id="reg-apellido" class="form-control" placeholder="Pérez" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reg-dni" class="form-label">DNI</label>
+                  <input 
+                    type="text" 
+                    id="reg-dni" 
+                    class="form-control text-mono" 
+                    placeholder="38999888" 
+                    maxlength="8" 
+                    required 
+                    pattern="\d{7,8}"
+                    title="Ingresá 7 u 8 números sin puntos"
+                  >
+                </div>
+                <div class="form-group">
+                  <label for="reg-telefono" class="form-label">Teléfono</label>
+                  <input type="tel" id="reg-telefono" class="form-control" placeholder="1145678901">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-email" class="form-label">Correo electrónico</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="socio@email.com" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-objetivo" class="form-label">Objetivo de entrenamiento</label>
+                <select id="reg-objetivo" class="form-control">
+                  <option value="Salud general" selected>Salud general y postura</option>
+                  <option value="Hipertrofia">Hipertrofia muscular</option>
+                  <option value="Pérdida de peso">Acondicionamiento y pérdida de peso</option>
+                  <option value="Fuerza">Fuerza y potencia</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reg-password" class="form-label">Contraseña</label>
+                  <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 8 caracteres" minlength="8" required>
+                </div>
+                <div class="form-group">
+                  <label for="reg-confirm-password" class="form-label">Confirmar contraseña</label>
+                  <input type="password" id="reg-confirm-password" class="form-control" placeholder="Repetí contraseña" minlength="8" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block mt-3">
+                Crear cuenta de socio
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- VISTA 2: SESIÓN ACTIVA (Cuando el usuario ya ingresó) -->
+        <div id="view-session" class="session-view d-none">
+          <div class="session-badge-avatar" id="session-avatar">AD</div>
+          <h2 id="session-greeting" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem;">¡Bienvenido/a!</h2>
+          <p style="font-size: 0.825rem; color: var(--text-secondary);">Tu sesión está activa en este navegador</p>
+
+          <div class="session-details">
+            <div class="session-item">
+              <span class="label">Usuario</span>
+              <span class="value" id="session-user-name">-</span>
+            </div>
+            <div class="session-item">
+              <span class="label">Correo</span>
+              <span class="value" id="session-user-email">-</span>
+            </div>
+            <div class="session-item">
+              <span class="label">Rol</span>
+              <span class="value" id="session-user-role">-</span>
+            </div>
+            <div class="session-item">
+              <span class="label">Estado</span>
+              <span class="value" id="session-user-status" style="color: var(--primary);">Activo</span>
+            </div>
+          </div>
+
+          <div class="session-token-label">Token de autorización (JWT en localStorage):</div>
+          <div class="session-token-box" id="session-token-preview">-</div>
+
+          <button type="button" id="btn-logout" class="btn btn-secondary btn-block">
+            Cerrar sesión
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Pie Institucional e Información de Conexión a la API Exterior -->
+      <div class="auth-footer">
+        <div>ISFT 194 • Proyecto Final Integrador — GymSasS</div>
+        <div style="margin-top: 0.45rem; font-size: 0.72rem; color: var(--text-secondary);">
+          Backend API: <code id="api-url-badge" style="color: var(--primary); background: var(--bg-surface-elevated); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-subtle);">http://127.0.0.1:8000</code>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
