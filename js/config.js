@@ -18,9 +18,11 @@ const CONFIG = {
     // Autenticación (Semana 2)
     LOGIN: '/auth/login',
 
+    REGISTER: '/auth/register',
+
     // Usuarios y Registro (Semanas 1 y 2)
-    USUARIOS: '/usuarios',
-    PERFIL_ME: '/usuarios/me',
+    USUARIOS: '/us',
+    PERFIL_ME: '/users/me',
 
     // Healthcheck
     HEALTH: '/'
