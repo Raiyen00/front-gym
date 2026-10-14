@@ -153,42 +153,35 @@ const API = {
    * Compatible con payloads JSON y OAuth2 de FastAPI
    */
   async login(email, password) {
-    // Intento 1: Envío JSON estándar {"email": "...", "password": "...", "username": "..."}
-    let res = await this.request(CONFIG.ENDPOINTS.LOGIN, {
-      method: 'POST',
-      body: JSON.stringify({ email, password, username: email })
-    });
+  // FastAPI con OAuth2PasswordRequestForm requiere x-www-form-urlencoded
+  // y los campos DEBEN llamarse 'username' y 'password'
+  const formBody = new URLSearchParams();
+  formBody.append('username', email); // Aunque pidas el email al usuario, a FastAPI se lo mandas como 'username'
+  formBody.append('password', password);
 
-    // Si el backend de FastAPI usa OAuth2PasswordRequestForm (requiere form-urlencoded)
-    if (!res.success && res.status === 422 && typeof res.error === 'string' && res.error.includes('form')) {
-      const formBody = new URLSearchParams();
-      formBody.append('username', email);
-      formBody.append('password', password);
+  const res = await this.request(CONFIG.ENDPOINTS.LOGIN, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: formBody.toString()
+  });
 
-      res = await this.request(CONFIG.ENDPOINTS.LOGIN, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formBody.toString()
-      });
-    }
+  if (res.success && res.data) {
+    const token = res.data.access_token || res.data.token;
+    const user = res.data.usuario || res.data.user || {
+      email,
+      nombre: res.data.nombre || res.data.full_name || email.split('@')[0],
+      rol: res.data.rol || 'cliente',
+      activo: res.data.active ?? true
+    };
 
-    if (res.success && res.data) {
-      const token = res.data.access_token || res.data.token;
-      const user = res.data.usuario || res.data.user || {
-        email,
-        nombre: res.data.nombre || res.data.full_name || email.split('@')[0],
-        rol: res.data.rol || 'cliente',
-        activo: res.data.active ?? true
-      };
+    this.setSession(token, user);
+    return { success: true, user, token };
+  }
 
-      this.setSession(token, user);
-      return { success: true, user, token };
-    }
-
-    return { success: false, error: res.error || 'Error al iniciar sesión' };
-  },
+  return { success: false, error: res.error || 'Error al iniciar sesión' };
+},
 
   /**
    * Registro de Nuevo Socio (POST /usuarios)
@@ -201,16 +194,16 @@ const API = {
     const payload = {
       email: clienteData.email,
       password: clienteData.password,
-      full_name: fullName,
-      nombre: clienteData.nombre,
-      apellido: clienteData.apellido,
+      name: clienteData.nombre,
+      lastname: clienteData.apellido,
+      // full_name: fullName,
       dni: clienteData.dni,
-      telefono: clienteData.telefono,
-      objetivo: clienteData.objetivo,
-      rol: clienteData.rol || 'cliente'
+      phone : clienteData.telefono,
+      // objetivo: clienteData.objetivo,
+      // rol: clienteData.rol || 'cliente'
     };
 
-    const res = await this.request(CONFIG.ENDPOINTS.USUARIOS, {
+    const res = await this.request(CONFIG.ENDPOINTS.REGISTER, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
