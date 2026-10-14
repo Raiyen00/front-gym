@@ -54,8 +54,6 @@ Sistema de gestión deportiva y control de socios para centros de entrenamiento.
 front-gym/
 ├── index.html                 # Interfaz de Login y Registro centrado
 ├── README.md                  # Documentación del proyecto
-├── DEFENSA_TECNICA_EROS.md    # Guía técnica de defensa oral
-├── Plan_de_Proyecto_GymSasS.pdf
 ├── css/
 │   └── styles.css             # Sistema de diseño y estilos visuales
 └── js/
