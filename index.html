@@ -6,7 +6,33 @@
     <title>GymSasS — Gestión deportiva</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback informativo si se abre con doble clic (protocolo file://) en lugar de npm run dev -->
+      <script>
+        if (window.location.protocol === 'file:') {
+          document.write(`
+            <div style="font-family: system-ui, -apple-system, sans-serif; background: #09090b; color: #f4f4f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+              <div style="max-width: 520px; background: #121215; border: 1px solid #27272a; border-radius: 12px; padding: 2rem; box-shadow: 0 12px 32px rgba(0,0,0,0.6);">
+                <div style="font-size: 1.25rem; font-weight: 700; color: #10b981; margin-bottom: 0.75rem;">
+                  ⚡ GymSasS (React + Vite)
+                </div>
+                <p style="font-size: 0.95rem; color: #a1a1aa; line-height: 1.6; margin-bottom: 1.25rem;">
+                  Tu equipo migró el proyecto a <strong>React 19 + TypeScript + Vite</strong>. Las aplicaciones modernas con Vite no pueden ejecutarse directamente haciendo doble clic como archivo local (<code>file://</code>).
+                </p>
+                <div style="background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem; font-size: 0.875rem;">
+                  <strong style="color: #f4f4f5;">Para iniciarlo:</strong><br>
+                  1. Hacé doble clic en el archivo <code>iniciar.bat</code> que está en la carpeta principal.<br>
+                  o<br>
+                  2. Abrí una terminal en <code>frontend/</code> y ejecutá:
+                  <pre style="background: #09090b; color: #10b981; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">npm run dev</pre>
+                  Luego ingresá a: <a href="http://localhost:5173" style="color: #3b82f6;">http://localhost:5173</a>
+                </div>
+              </div>
+            </div>
+          `);
+        }
+      </script>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
