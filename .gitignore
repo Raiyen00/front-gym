@@ -6,3 +6,17 @@ Thumbs.db
 
 # Temporales y Logs
 *.log
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Testing
+coverage/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
