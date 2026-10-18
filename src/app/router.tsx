@@ -9,6 +9,8 @@ import { NotFoundPage } from '@/routes/NotFoundPage'
 import { PlaceholderPage } from '@/routes/PlaceholderPage'
 import { UsersPage } from '@/features/users/components/UsersPage'
 import { ProfilePage } from '@/features/users/components/ProfilePage'
+import { SportProfilesPage } from '@/features/sportProfiles/components/SportProfilesPage'
+import { MySportProfilePage } from '@/features/sportProfiles/components/MySportProfilePage'
 
 export function AppRouter() {
   return (
@@ -44,10 +46,26 @@ export function AppRouter() {
             }
           />
           <Route
+            path="/perfiles-deportivos"
+            element={
+              <RequireRole roles={['admin']}>
+                <SportProfilesPage />
+              </RequireRole>
+            }
+          />
+          <Route
             path="/mi-perfil"
             element={
               <RequireRole roles={['cliente']}>
                 <ProfilePage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/mi-perfil-deportivo"
+            element={
+              <RequireRole roles={['cliente']}>
+                <MySportProfilePage />
               </RequireRole>
             }
           />

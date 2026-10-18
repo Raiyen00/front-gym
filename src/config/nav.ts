@@ -1,7 +1,9 @@
 import {
+  Activity,
   ClipboardList,
   CreditCard,
   Dumbbell,
+  HeartPulse,
   LayoutDashboard,
   UserCog,
   Users,
@@ -50,9 +52,21 @@ export const NAV_ITEMS: NavItem[] = [
     allowedRoles: TODOS,
   },
   {
+    label: 'Perfiles deportivos',
+    to: '/perfiles-deportivos',
+    icon: Activity,
+    allowedRoles: ['admin'],
+  },
+  {
     label: 'Mi perfil',
     to: '/mi-perfil',
     icon: UserCog,
+    allowedRoles: ['cliente'],
+  },
+  {
+    label: 'Mi perfil deportivo',
+    to: '/mi-perfil-deportivo',
+    icon: HeartPulse,
     allowedRoles: ['cliente'],
   },
   {
