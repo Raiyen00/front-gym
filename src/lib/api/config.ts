@@ -32,6 +32,7 @@ export const ENDPOINTS = {
   REGISTER: '/auth/register',
   ME: '/users/me',
   USERS: '/users',
+  SPORT_PROFILES: '/sport-profiles',
   HEALTH: '/',
 } as const
 
