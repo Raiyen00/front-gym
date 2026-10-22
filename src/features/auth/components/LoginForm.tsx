@@ -55,9 +55,11 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
 
   return (
     <>
-      <div className="mb-5 text-left">
-        <h2 className="text-xl font-semibold text-foreground">Ingreso al sistema</h2>
-        <p className="mt-0.5 text-[0.825rem] text-muted-foreground">
+      <div className="mb-6">
+        <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.03em] text-foreground">
+          Ingreso al sistema
+        </h1>
+        <p className="mt-1.5 text-[0.8125rem] text-muted-foreground">
           Completá tus credenciales para acceder a tu cuenta
         </p>
       </div>
@@ -106,7 +108,7 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
 
           <Button
             type="submit"
-            className="mt-4 w-full"
+            className="mt-6 h-10 w-full"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting && (

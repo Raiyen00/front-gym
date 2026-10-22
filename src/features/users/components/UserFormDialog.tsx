@@ -180,12 +180,12 @@ export function UserFormDialog({
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
-                    <Loader2 className="size-3.5 animate-spin mr-2" />
+                    <Loader2 className="size-3.5 animate-spin" />
                     Guardando...
                   </>
                 ) : (
                   <>
-                    <Save className="size-3.5 mr-2" />
+                    <Save className="size-3.5" />
                     Guardar cambios
                   </>
                 )}

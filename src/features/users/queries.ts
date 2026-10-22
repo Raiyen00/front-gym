@@ -1,12 +1,23 @@
 import { queryKeys } from '@/lib/api/queryKeys'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as usersApi from '@/features/users/api'
-import type { UserUpdate } from '@/types/user'
+import type { UserCreate, UserUpdate } from '@/types/user'
 
 export function useUsers() {
   return useQuery({
     queryKey: queryKeys.users.all,
     queryFn: usersApi.getUsers,
+  })
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: UserCreate) => usersApi.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all })
+    },
   })
 }
 

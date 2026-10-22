@@ -14,12 +14,14 @@ export function ApiUrlBadge() {
   }
 
   return (
-    <code
+    <button
+      type="button"
       onClick={handleClick}
-      title="Clic para cambiar la URL de la API"
-      className="cursor-pointer rounded border border-border bg-surface-elevated px-1.5 py-0.5 text-primary"
+      title={`${url} — clic para cambiar la URL de la API`}
+      className="inline-flex h-7 max-w-[13rem] cursor-pointer items-center gap-2 rounded-full border border-border px-2.5 text-[0.6875rem] text-text-muted transition-colors hover:border-border-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"
     >
-      {url}
-    </code>
+      <span className="size-1.5 shrink-0 rounded-full bg-state-positive-ink" aria-hidden="true" />
+      <span className="truncate font-mono">{url.replace(/^https?:\/\//, '')}</span>
+    </button>
   )
 }

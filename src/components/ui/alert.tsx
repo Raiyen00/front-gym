@@ -3,20 +3,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg px-4 py-3 text-[0.8125rem] has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
-        destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
-        error:
-          "border-[rgba(239,68,68,0.25)] bg-[rgba(239,68,68,0.08)] text-[#fca5a5] [&>svg]:text-[#fca5a5]",
-        warning:
-          "border-[rgba(245,158,11,0.25)] bg-[rgba(245,158,11,0.08)] text-[#fde68a] [&>svg]:text-[#fde68a]",
-        success:
-          "border-[rgba(16,185,129,0.25)] bg-[rgba(16,185,129,0.08)] text-[#86efac] [&>svg]:text-[#86efac]",
-        info: "border-[rgba(59,130,246,0.25)] bg-[rgba(59,130,246,0.08)] text-[#93c5fd] [&>svg]:text-[#93c5fd]",
+        default: "bg-surface text-muted-foreground",
+        destructive: "bg-state-negative-bg text-state-negative-ink",
+        error: "bg-state-negative-bg text-state-negative-ink",
+        warning: "bg-state-warning-bg text-state-warning-ink",
+        success: "bg-state-positive-bg text-state-positive-ink",
+        info: "bg-surface text-foreground/85",
       },
     },
     defaultVariants: {
@@ -61,7 +57,7 @@ function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        "col-start-2 grid justify-items-start gap-1 text-sm text-muted-foreground [&_p]:leading-relaxed",
+        "col-start-2 grid justify-items-start gap-1 text-[0.8125rem] leading-relaxed text-inherit [&_p]:leading-relaxed",
         className
       )}
       {...props}

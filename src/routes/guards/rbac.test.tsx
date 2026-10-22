@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -64,6 +65,7 @@ describe('RBAC y navegación', () => {
     expect(screen.queryByRole('link', { name: 'Socios' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Pagos' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Mi perfil' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Mi membresía' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Rutinas' })).toBeInTheDocument()
   })
 
@@ -87,6 +89,10 @@ describe('RBAC y navegación', () => {
 
   it('el admin accede a Pagos', async () => {
     mockSession('admin')
+    server.use(
+      http.get(`${BASE}/payment`, () => HttpResponse.json([])),
+      http.get(`${BASE}/users`, () => HttpResponse.json([])),
+    )
     goTo('/pagos')
     render(<App />)
 
@@ -94,5 +100,21 @@ describe('RBAC y navegación', () => {
       await screen.findByRole('heading', { name: 'Pagos' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Socios' })).toBeInTheDocument()
+  })
+
+  it('el admin abre el diálogo de alta de socio', async () => {
+    mockSession('admin')
+    server.use(http.get(`${BASE}/users`, () => HttpResponse.json([])))
+    goTo('/usuarios')
+    const user = userEvent.setup()
+    render(<App />)
+
+    await screen.findByRole('heading', { name: 'Socios' })
+    await user.click(screen.getByRole('button', { name: 'Nuevo socio' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Nuevo socio' }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Contraseña inicial')).toBeInTheDocument()
   })
 })

@@ -31,7 +31,7 @@
 - `AuthContext`: `updateCurrentUser()` para reflejar la edición propia en sesión/header
 - Router actualizado: `/usuarios` → `UsersPage`, `/mi-perfil` → `ProfilePage`
 
-✅ **Tests:** 54 tests pasan (incluye `users/api.test.ts`, `sportProfiles/api.test.ts`, `sportProfiles/payload.test.ts`, `SportProfileFormDialog.test.tsx` y auth-flow para `state`)
+✅ **Tests:** 72 tests pasan (incluye `users/api.test.ts`, `sportProfiles/*`, `payments/*` y auth-flow para `state`)
 
 ✅ **Build/Lint/Typecheck:** Todo pasa
 
@@ -52,6 +52,20 @@
     - `MySportProfilePage.tsx`: `/mi-perfil-deportivo` (cliente, SOLO LECTURA de `GET /sport-profiles/me`)
 - Router y `config/nav.ts` actualizados: "Perfiles deportivos" (admin) y "Mi perfil deportivo" (cliente)
 - Contrato verificado **contra el código del back** (`schemas/sport_profile_schema.py`, `controllers/sport_profile_controller.py`, `services/..._service.py`, `security/permissions.py`), no solo contra el prompt
+
+---
+
+## ✅ Fase 11: Feature Payments (Etapa 5 API)
+
+- `ENDPOINTS.PAYMENTS = '/payment'` (`lib/api/config.ts`) — **la API lo expone en singular**
+- `src/features/payments/`:
+  - `api.ts`: `getPayments()`, `getMyPayments()`, `getPayment(id)`, `createPayment()`
+  - `queries.ts`: hooks + `useCreatePayment` (invalida `payments.all` y `payments.me`)
+  - `schema.ts` + `payload.ts`: monto como string (acepta coma decimal), método enum y vencimiento `YYYY-MM-DD` → `${fecha}T00:00:00`; nunca envía `payment_date`
+  - `membership.ts`: `daysUntilExpiration`, `getPaymentStatus`, `isPaymentActive`, `getMembershipStatus`, `countExpiredMemberships` (cuenta socios por su último pago, no pagos sueltos)
+  - `components/`: `PaymentsPage` (`/pagos`, admin, KPIs + búsqueda + alta + detalle), `MyMembershipPage` (`/mi-membresia`, cliente, estado + historial), `PaymentsTable`, `PaymentFormDialog`, `PaymentDetailDialog`, `PaymentDetails`
+- La API **no expone PATCH ni DELETE** de pagos → la UI no ofrece editar/eliminar
+- Router y nav: "Pagos" (admin) y "Mi membresía" (cliente)
 
 ---
 
@@ -108,15 +122,23 @@
 - [ ] Editor rutinas (profesor/admin) + visor read-only (cliente)
 - [ ] Endpoints: `GET/POST /routines`, `GET/PATCH/DELETE /routines/{id}`, ejercicios de rutina
 
-### Fase 11 — Payments (Etapa 5 API)
-- [ ] `src/features/payments/`
-- [ ] Registro pagos (admin) + "Mi membresía" (cliente)
-- [ ] Endpoints: `GET/POST /payments`, `GET /payments/me`
+### Fase 11 — Payments (Etapa 5 API) ✅
+- [x] `src/features/payments/`
+- [x] Registro de pagos (admin) + "Mi membresía" (cliente)
+- [x] Endpoints: `GET/POST /payment`, `GET /payment/me`, `GET /payment/{id}` (sin PATCH/DELETE en la API)
 
 ### Fase 12 — Transversal (Etapa 6 API)
 - [ ] Paginación, orden, búsqueda global
 - [ ] Toasts de mutación (éxito/error) consistentes
 - [ ] Optimistic updates donde corresponda
+
+### Rediseño visual (2026-10-21) ✅
+- [x] Dirección "bitácora de entrenamiento": tinta verde, hueso y menta eléctrica; grilla técnica como motivo.
+- [x] Tipografía: `Archivo` (display) + `Instrument Sans` (UI), cargadas en `index.html`.
+- [x] Auth de dos columnas con statement editorial; shell con sidebar seccionado (General / Gestión / Mi cuenta) y topbar mobile.
+- [x] Panel con hero, accesos rápidos por rol, tarjeta de cuenta y "Primeros pasos".
+- [x] Tokens y utilidades en `src/index.css`; primitivos shadcn ajustados (button, card, input, select, table, dialog, badge, alert).
+- [x] Verificado: `npm test` (72), `npm run typecheck`, `npm run lint`, `npm run build`.
 
 ---
 
@@ -221,6 +243,7 @@ logo, settings). Dejarlos configurables en un solo lugar, como ya se hace con
 ## Próximos pasos inmediatos
 
 1. **Probar Fase 9 con API real** (`python -m uvicorn main:app --reload`): alta de perfil (elegir socio), edición parcial, borrado y `/mi-perfil-deportivo` con un cliente. Verificar 403 al forzar escritura como cliente y 404 con `user_id` inexistente.
-2. **Confirmar permisos de cliente** en `/mi-perfil` (`PATCH /users/{id}` admin-only) → si sigue dando 403, definir `/users/me` para clientes.
-3. **Arreglar CORS en API** → `allow_credentials=False` en `main.py` (si aún no está).
-4. **Comenzar Fase 8 (Exercises)** cuando corresponda.
+2. **Probar Fase 11 con API real**: registrar un pago como admin, verificar KPIs, detalle y estado; entrar con un cliente y revisar `/mi-membresia` (vigente, vence hoy y vencida).
+3. **Confirmar permisos de cliente** en `/mi-perfil` (`PATCH /users/{id}` admin-only) → si sigue dando 403, definir `/users/me` para clientes.
+4. **Arreglar CORS en API** → `allow_credentials=False` en `main.py` (si aún no está).
+5. **Comenzar Fase 10 (Routines)**: la API ya expone el CRUD de la cabecera, pero **falta `/exercises` y `/routine-exercises`** para el editor completo. Mientras tanto se puede hacer la cabecera + visor read-only.

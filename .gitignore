@@ -15,8 +15,11 @@ dist-ssr/
 
 # Testing
 coverage/
-
+.aider-desk/
 # Variables de entorno
 .env
 .env.local
 .env.*.local
+
+# Notas de estudio
+STUDY.md

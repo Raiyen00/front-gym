@@ -14,9 +14,11 @@ function SessionItem({ label, value, valueClass }: {
   valueClass?: string
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-border py-[0.45rem] text-[0.825rem] last:border-b-0 last:pb-0">
-      <span className="text-text-muted">{label}</span>
-      <span className={cn('font-medium text-foreground', valueClass)}>{value}</span>
+    <div className="flex items-baseline justify-between gap-4 border-b border-border py-3 text-[0.8125rem] last:border-b-0">
+      <dt className="text-text-muted">{label}</dt>
+      <dd className={cn('truncate text-right font-medium text-foreground', valueClass)}>
+        {value}
+      </dd>
     </div>
   )
 }
@@ -38,18 +40,25 @@ export function SessionView() {
   }
 
   return (
-    <div className="text-center">
-      <div className="mx-auto mb-4 flex size-[58px] items-center justify-center rounded-full border-2 border-primary bg-[rgba(16,185,129,0.08)] text-[1.4rem] font-bold text-primary">
-        {initials}
+    <div>
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-[0.8125rem] font-semibold tracking-wide text-foreground"
+        >
+          {initials}
+        </span>
+        <div className="min-w-0">
+          <h1 className="truncate text-[1.25rem] leading-tight font-semibold tracking-[-0.03em] text-foreground">
+            ¡Hola, {user.name || 'Socio'}!
+          </h1>
+          <p className="mt-0.5 text-xs text-text-muted">
+            Sesión activa en este navegador
+          </p>
+        </div>
       </div>
-      <h2 className="text-xl font-semibold text-foreground">
-        ¡Hola, {user.name || 'Socio'}!
-      </h2>
-      <p className="mt-0.5 text-[0.825rem] text-muted-foreground">
-        Tu sesión está activa en este navegador
-      </p>
 
-      <div className="my-5 rounded-md border border-border bg-surface-elevated p-4 text-left">
+      <dl className="mt-6 rounded-lg bg-input-bg px-4 py-1">
         <SessionItem
           label="Usuario"
           value={`${user.name ?? ''} ${user.lastname ?? ''}`.trim() || 'Usuario'}
@@ -59,24 +68,24 @@ export function SessionView() {
         <SessionItem
           label="Estado"
           value={stateLabel}
-          valueClass={isActive ? 'text-primary' : 'text-warning'}
+          valueClass={isActive ? 'text-state-positive-ink' : 'text-warning'}
         />
-      </div>
+      </dl>
 
-      <p className="mb-1.5 text-left text-[0.75rem] text-text-muted">
-        Token de autorización (JWT en localStorage):
+      <p className="mt-5 mb-1.5 text-[0.6875rem] text-text-muted">
+        Token de autorización (JWT en localStorage)
       </p>
-      <div className="mb-5 max-h-[65px] overflow-y-auto rounded-sm border border-border bg-input-bg px-3 py-[0.55rem] text-left font-mono text-[0.725rem] break-all text-primary">
+      <div className="mb-6 max-h-[65px] overflow-y-auto rounded-md bg-background px-3 py-2 font-mono text-[0.6875rem] leading-relaxed break-all text-state-positive-ink">
         {token || 'Bearer (sin token)'}
       </div>
 
-      <Button asChild className="mb-2 w-full">
+      <Button asChild className="mb-2 h-10 w-full">
         <Link to="/dashboard">
           <LayoutDashboard className="size-3.5" />
           Ir al panel
         </Link>
       </Button>
-      <Button variant="secondary" className="w-full" onClick={handleLogout}>
+      <Button variant="secondary" className="h-10 w-full" onClick={handleLogout}>
         <LogOut className="size-3.5" />
         Cerrar sesión
       </Button>

@@ -35,7 +35,7 @@ export function SportProfileDetailDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Activity className="size-5 text-primary" />
+            <Activity className="size-4 text-text-muted" strokeWidth={1.75} />
             Detalle del perfil deportivo
           </DialogTitle>
           <DialogDescription>{profile ? `ID ${profile.id}` : 'Información registrada'}</DialogDescription>
@@ -57,13 +57,13 @@ export function SportProfileDetailDialog({
           </Button>
           {profile && (
             <Button type="button" onClick={() => onEdit(profile.id)}>
-              <Pencil className="size-3.5 mr-2" />
+              <Pencil className="size-3.5" />
               Editar
             </Button>
           )}
           {profile && (
             <Button type="button" variant="destructive" onClick={() => onDelete(profile.id)}>
-              <Trash2 className="size-3.5 mr-2" />
+              <Trash2 className="size-3.5" />
               Eliminar
             </Button>
           )}

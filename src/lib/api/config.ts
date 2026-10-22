@@ -33,6 +33,8 @@ export const ENDPOINTS = {
   ME: '/users/me',
   USERS: '/users',
   SPORT_PROFILES: '/sport-profiles',
+  /** Ojo: la API expone `/payment` en singular. */
+  PAYMENTS: '/payment',
   HEALTH: '/',
 } as const
 

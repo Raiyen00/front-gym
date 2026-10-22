@@ -4,8 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ==========================================================================
-   GymSasS — Design System (portado de css/styles.css)
-   Tema oscuro con paleta Zinc + acento esmeralda.
+   GymSasS — Design System
+   Dirección: "true-black flat" sobre un negro verdoso.
+   Una sola superficie, elevación por paso de tono, color solo en datos y
+   estados. Reglas de 1px como única separación estructural.
    ========================================================================== */
 
 :root {
@@ -13,51 +15,64 @@
   --radius: 12px;
 
   /* Superficies y texto (mapeo shadcn) */
-  --background: #09090b; /* bg-app */
-  --foreground: #f4f4f5; /* text-primary */
+  --background: #050b08;
+  --foreground: #eef4ef;
 
-  --card: #121215; /* bg-surface */
-  --card-foreground: #f4f4f5;
+  --card: #0a1310;
+  --card-foreground: #eef4ef;
 
-  --popover: #18181b; /* bg-surface-elevated */
-  --popover-foreground: #f4f4f5;
+  --popover: #0c1712;
+  --popover-foreground: #eef4ef;
 
-  --primary: #10b981;
-  --primary-foreground: #052e16;
+  /* Primario invertido: hueso sobre tinta. El verde queda para los datos. */
+  --primary: #e9f1ec;
+  --primary-foreground: #06100a;
 
-  --secondary: #18181b;
-  --secondary-foreground: #f4f4f5;
+  --secondary: #14201a;
+  --secondary-foreground: #e6efe9;
 
-  --muted: #18181b;
-  --muted-foreground: #a1a1aa; /* text-secondary */
+  --muted: #0f1a15;
+  --muted-foreground: #a4b3a9;
 
-  --accent: #1f1f23; /* bg-surface-hover */
-  --accent-foreground: #f4f4f5;
+  --accent: #16241d;
+  --accent-foreground: #eef4ef;
 
-  --destructive: #ef4444;
-  --destructive-foreground: #fafafa;
+  --destructive: #f2777a;
+  --destructive-foreground: #190708;
 
-  --border: #27272a; /* border-subtle */
-  --border-muted: #3f3f46;
-  --input: #27272a;
-  --ring: #10b981;
+  --border: #16221c;
+  --border-muted: #24352c;
+  --input: #27392f;
+  --ring: #3ce39b;
 
   /* Tokens propios del proyecto */
-  --surface: #121215;
-  --surface-elevated: #18181b;
-  --surface-hover: #1f1f23;
-  --input-bg: #141417;
-  --text-muted: #71717a;
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  --surface: #0a1310;
+  --surface-elevated: #101c16;
+  --surface-hover: #12201a;
+  --input-bg: #07100c;
+  --text-muted: #8d9c92;
+  --warning: #e8b464;
+  --info: #86b2f0;
 
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Estado: pares pálidos con tinta propia */
+  --state-positive-bg: rgba(60, 227, 155, 0.1);
+  --state-positive-ink: #6fe9b4;
+  --state-neutral-bg: #16231c;
+  --state-neutral-ink: #c3d0c8;
+  --state-warning-bg: rgba(232, 180, 100, 0.11);
+  --state-warning-ink: #edc178;
+  --state-negative-bg: rgba(242, 119, 122, 0.1);
+  --state-negative-ink: #f79c9e;
 
-  /* Sombras (nombres internos para evitar referencias circulares) */
-  --shadow-elevation-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-elevation-md: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
-  --shadow-elevation-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+  --font-family: "Instrument Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-display-family: "Archivo", "Instrument Sans", ui-sans-serif, system-ui,
+    sans-serif;
+
+  /* Elevación: solo para lo que flota (menú, diálogo) */
+  --shadow-elevation-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-elevation-md: 0 16px 32px -24px rgba(0, 0, 0, 0.4);
+  --shadow-elevation-lg: 0 28px 56px -32px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -91,14 +106,24 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
-  /* Radios */
-  --radius-sm: 4px;
+  --color-state-positive-bg: var(--state-positive-bg);
+  --color-state-positive-ink: var(--state-positive-ink);
+  --color-state-neutral-bg: var(--state-neutral-bg);
+  --color-state-neutral-ink: var(--state-neutral-ink);
+  --color-state-warning-bg: var(--state-warning-bg);
+  --color-state-warning-ink: var(--state-warning-ink);
+  --color-state-negative-bg: var(--state-negative-bg);
+  --color-state-negative-ink: var(--state-negative-ink);
+
+  /* Radios: tarjeta, control, pastilla. Nada intermedio. */
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
 
   /* Tipografía */
   --font-sans: var(--font-family);
+  --font-display: var(--font-display-family);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", monospace;
 
@@ -114,14 +139,16 @@
   }
 
   html {
-    font-size: 14px;
+    font-size: 16px;
     color-scheme: dark;
+    scrollbar-color: var(--border-muted) transparent;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-size: 0.875rem;
     line-height: 1.5;
-    letter-spacing: -0.011em;
+    letter-spacing: 0;
     min-height: 100vh;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -132,9 +159,10 @@
   h4,
   h5,
   h6 {
+    font-family: var(--font-display-family);
     font-weight: 600;
-    letter-spacing: -0.025em;
-    line-height: 1.25;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 
   p {
@@ -144,6 +172,71 @@
   a {
     color: inherit;
     text-decoration: none;
-    transition: all 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-muted);
+    border: 3px solid var(--background);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #34503f;
+  }
+}
+
+@layer utilities {
+  /* Cifras que se comparan: siempre tabulares y alineadas. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .text-display {
+    font-family: var(--font-display-family);
+    letter-spacing: -0.025em;
+  }
+
+  /* Zona de contenido: un solo margen lateral en todo el panel. */
+  .app-canvas {
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .app-canvas {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .app-canvas {
+      padding-inline: 2.5rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

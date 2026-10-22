@@ -72,9 +72,11 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
 
   return (
     <>
-      <div className="mb-5 text-left">
-        <h2 className="text-xl font-semibold text-foreground">Alta de nuevo socio</h2>
-        <p className="mt-0.5 text-[0.825rem] text-muted-foreground">
+      <div className="mb-6">
+        <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.03em] text-foreground">
+          Alta de nuevo socio
+        </h1>
+        <p className="mt-1.5 text-[0.8125rem] text-muted-foreground">
           Registrá tus datos personales para darte de alta en el gimnasio
         </p>
       </div>
@@ -83,7 +85,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-          <div className="grid grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="name"
@@ -112,7 +114,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
             />
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3.5">
+          <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="dni"
@@ -171,7 +173,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
             )}
           />
 
-          <div className="mt-4 grid grid-cols-2 gap-3.5">
+          <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="password"
@@ -212,7 +214,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
 
           <Button
             type="submit"
-            className="mt-3 w-full"
+            className="mt-6 h-10 w-full"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting && (
