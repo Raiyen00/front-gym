@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/features/auth/useAuth'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Form,
   FormControl,
@@ -20,6 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { userUpdateSchema, type UserUpdateFormValues } from '@/features/users/schema'
 import { useUpdateUser } from '@/features/users/queries'
 import { getErrorMessage } from '@/features/auth/utils'
+import { ROL_LABELS, USER_STATE_LABELS } from '@/types/enums'
 
 export function ProfilePage() {
   const { user, updateCurrentUser } = useAuth()
@@ -52,27 +53,37 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Mi perfil</h1>
-        <p className="text-muted-foreground">Gestión de tu información personal</p>
-      </div>
+    <div className="flex flex-col gap-6 lg:max-w-5xl">
+      <header>
+        <h1 className="text-[1.5rem] leading-tight font-semibold tracking-[-0.02em] text-foreground">
+          Mi perfil
+        </h1>
+        <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+          Tus datos personales y de contacto.
+        </p>
+      </header>
 
       {alert && (
-        <Alert className={alert.type === 'error' ? 'border-destructive' : ''}>
+        <Alert variant={alert.type === 'error' ? 'error' : 'success'}>
           <AlertCircle className="size-4" />
           <AlertDescription>{alert.message}</AlertDescription>
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Información personal</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-stretch">
+        <section className="rounded-xl bg-card px-5 py-5 md:px-6 md:py-6">
+          <div>
+            <h2 className="text-[0.9375rem] font-semibold text-foreground">
+              Información personal
+            </h2>
+            <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+              Solo se guardan los campos que modifiques.
+            </p>
+          </div>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="name"
@@ -99,9 +110,6 @@ export function ProfilePage() {
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="dni"
@@ -134,58 +142,96 @@ export function ProfilePage() {
                     </FormItem>
                   )}
                 />
+                <div className="sm:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo electrónico</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="socio@email.com"
+                            autoComplete="email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="socio@email.com" autoComplete="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className="w-full sm:w-auto" disabled={form.formState.isSubmitting || updateUser.isPending}>
-                {form.formState.isSubmitting || updateUser.isPending ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin mr-2" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="size-3.5 mr-2" />
-                    Guardar cambios
-                  </>
-                )}
-              </Button>
+              <div className="mt-6 flex justify-end border-t border-border pt-5">
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting || updateUser.isPending}
+                >
+                  {form.formState.isSubmitting || updateUser.isPending ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="size-4" strokeWidth={1.75} />
+                      Guardar cambios
+                    </>
+                  )}
+                </Button>
+              </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </section>
 
-      <Card className="border-warning/50">
-        <CardHeader>
-          <CardTitle className="text-warning flex items-center gap-2">
-            <AlertCircle className="size-4" />
-            Información de solo lectura
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="grid grid-cols-2 gap-2">
-            <span className="text-muted-foreground">Rol</span>
-            <span className="font-medium">{user?.rol || '-'}</span>
-            <span className="text-muted-foreground">Estado</span>
-            <span className="font-medium">{user?.state || '-'}</span>
-            <span className="text-muted-foreground">Registrado</span>
-            <span className="font-medium">{user?.register_date ? new Date(user.register_date).toLocaleDateString('es-AR') : '-'}</span>
-          </div>
-        </CardContent>
-      </Card>
+        <aside className="flex flex-col rounded-xl bg-card px-5 py-5 md:px-6 md:py-6">
+          <h2 className="text-[0.9375rem] font-semibold text-foreground">Tu cuenta</h2>
+          <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+            Datos de solo lectura.
+          </p>
+
+          <dl className="mt-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+              <dt className="text-[0.8125rem] text-text-muted">Rol</dt>
+              <dd className="text-[0.8125rem] font-medium text-foreground">
+                {user ? ROL_LABELS[user.rol] : '-'}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+              <dt className="text-[0.8125rem] text-text-muted">Estado</dt>
+              <dd>
+                {user && (
+                  <Badge
+                    variant={
+                      user.state === 'activo' || user.state === 'habilitado_entrenar'
+                        ? 'default'
+                        : user.state === 'pendiente_habilitacion'
+                          ? 'warning'
+                          : 'destructive'
+                    }
+                  >
+                    {USER_STATE_LABELS[user.state]}
+                  </Badge>
+                )}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-[0.8125rem] text-text-muted">Registrado</dt>
+              <dd className="num text-[0.8125rem] font-medium text-foreground">
+                {user?.register_date
+                  ? new Date(user.register_date).toLocaleDateString('es-AR')
+                  : '-'}
+              </dd>
+            </div>
+          </dl>
+
+          <p className="mt-auto border-t border-border pt-4 text-xs leading-relaxed text-text-muted">
+            El rol y el estado los asigna un administrador del gimnasio.
+          </p>
+        </aside>
+      </div>
     </div>
   )
 }

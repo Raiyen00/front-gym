@@ -17,7 +17,7 @@ export function AuthTabs({ value, onChange }: AuthTabsProps) {
     <div
       role="tablist"
       aria-label="Modo de acceso"
-      className="mb-5 flex gap-0.5 rounded-md border border-border bg-surface-elevated p-0.5"
+      className="mb-6 grid grid-cols-2 gap-1 rounded-lg bg-input-bg p-1"
     >
       {TABS.map((tab) => {
         const active = value === tab.value
@@ -29,10 +29,10 @@ export function AuthTabs({ value, onChange }: AuthTabsProps) {
             aria-selected={active}
             onClick={() => onChange(tab.value)}
             className={cn(
-              'flex-1 rounded-[6px] px-3 py-[0.45rem] text-[0.825rem] font-medium transition-colors',
+              'h-8 rounded-md text-[0.8125rem] transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none',
               active
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-surface-elevated font-medium text-foreground'
+                : 'font-normal text-text-muted hover:text-foreground',
             )}
           >
             {tab.label}

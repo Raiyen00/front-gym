@@ -27,9 +27,11 @@ interface UserDetailDialogProps {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-border/50 pb-2 last:border-0 last:pb-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{children}</span>
+    <div className="flex items-baseline justify-between gap-4 border-b border-border py-2 last:border-b-0 last:pb-0">
+      <span className="text-[0.8125rem] text-text-muted">{label}</span>
+      <span className="text-right text-[0.8125rem] font-medium text-foreground">
+        {children}
+      </span>
     </div>
   )
 }
@@ -48,7 +50,7 @@ export function UserDetailDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserIcon className="size-5 text-primary" />
+            <UserIcon className="size-4 text-text-muted" strokeWidth={1.75} />
             Detalle del socio
           </DialogTitle>
           <DialogDescription>
@@ -63,12 +65,12 @@ export function UserDetailDialog({
         ) : error ? (
           <div className="py-4 text-sm text-destructive">{getErrorMessage(error)}</div>
         ) : user ? (
-          <div className="grid gap-3 text-sm">
+          <div className="grid gap-0 text-sm">
             <Field label="Nombre">{user.name}</Field>
             <Field label="Apellido">{user.lastname}</Field>
             <Field label="Email">{user.email}</Field>
             <Field label="DNI">
-              <span className="font-mono">{user.dni}</span>
+              <span className="num font-mono">{user.dni}</span>
             </Field>
             <Field label="Teléfono">{user.phone || '-'}</Field>
             <Field label="Rol">
@@ -78,7 +80,9 @@ export function UserDetailDialog({
               <Badge variant="secondary">{USER_STATE_LABELS[user.state] || user.state}</Badge>
             </Field>
             <Field label="Registrado">
-              {format(new Date(user.register_date), 'dd/MM/yyyy')}
+              <span className="num">
+                {format(new Date(user.register_date), 'dd/MM/yyyy')}
+              </span>
             </Field>
           </div>
         ) : null}
@@ -89,13 +93,13 @@ export function UserDetailDialog({
           </Button>
           {canManage && user && user.state !== 'habilitado_entrenar' && (
             <Button type="button" onClick={() => onEnable(user)}>
-              <CheckCircle2 className="size-3.5 mr-2" />
+              <CheckCircle2 className="size-3.5" />
               Habilitar
             </Button>
           )}
           {canManage && user && (
             <Button type="button" variant="destructive" onClick={() => onDelete(user)}>
-              <Trash2 className="size-3.5 mr-2" />
+              <Trash2 className="size-3.5" />
               Eliminar
             </Button>
           )}

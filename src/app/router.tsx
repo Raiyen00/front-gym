@@ -11,6 +11,8 @@ import { UsersPage } from '@/features/users/components/UsersPage'
 import { ProfilePage } from '@/features/users/components/ProfilePage'
 import { SportProfilesPage } from '@/features/sportProfiles/components/SportProfilesPage'
 import { MySportProfilePage } from '@/features/sportProfiles/components/MySportProfilePage'
+import { PaymentsPage } from '@/features/payments/components/PaymentsPage'
+import { MyMembershipPage } from '@/features/payments/components/MyMembershipPage'
 
 export function AppRouter() {
   return (
@@ -73,7 +75,15 @@ export function AppRouter() {
             path="/pagos"
             element={
               <RequireRole roles={['admin']}>
-                <PlaceholderPage title="Pagos" />
+                <PaymentsPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/mi-membresia"
+            element={
+              <RequireRole roles={['cliente']}>
+                <MyMembershipPage />
               </RequireRole>
             }
           />

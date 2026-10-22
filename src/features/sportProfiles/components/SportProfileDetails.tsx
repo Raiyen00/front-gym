@@ -5,9 +5,11 @@ import type { SportProfile } from '@/types/sportProfile'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-border/50 pb-2 last:border-0 last:pb-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{children}</span>
+    <div className="flex items-baseline justify-between gap-4 border-b border-border py-2 last:border-b-0 last:pb-0">
+      <span className="text-[0.8125rem] text-text-muted">{label}</span>
+      <span className="text-right text-[0.8125rem] font-medium text-foreground">
+        {children}
+      </span>
     </div>
   )
 }
@@ -20,13 +22,19 @@ interface SportProfileDetailsProps {
 /** Detalle de solo lectura de un perfil deportivo. */
 export function SportProfileDetails({ profile, userLabel }: SportProfileDetailsProps) {
   return (
-    <div className="grid gap-3 text-sm">
+    <div>
       {userLabel && <Field label="Socio">{userLabel}</Field>}
       <Field label="Objetivo">{formatSportOption(profile.goal)}</Field>
       <Field label="Nivel">{formatSportOption(profile.level)}</Field>
-      <Field label="Días por semana">{profile.days_per_week}</Field>
-      <Field label="Duración de sesión">{profile.session_duration} min</Field>
-      <Field label="Edad">{profile.age}</Field>
+      <Field label="Días por semana">
+        <span className="num">{profile.days_per_week}</span>
+      </Field>
+      <Field label="Duración de sesión">
+        <span className="num">{profile.session_duration} min</span>
+      </Field>
+      <Field label="Edad">
+        <span className="num">{profile.age}</span>
+      </Field>
       <Field label="Lesiones">{profile.injuries?.trim() ? profile.injuries : '-'}</Field>
       <Field label="Seguimiento del entrenador">
         <Badge variant={profile.trainer_tracking ? 'default' : 'outline'}>

@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SportProfilesTable } from '@/features/sportProfiles/components/SportProfilesTable'
 import { SportProfileFormDialog } from '@/features/sportProfiles/components/SportProfileFormDialog'
 import { SportProfileDetailDialog } from '@/features/sportProfiles/components/SportProfileDetailDialog'
@@ -98,17 +97,23 @@ export function SportProfilesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="size-6 animate-spin text-primary" />
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="size-5 animate-spin text-text-muted" />
+        <span className="sr-only">Cargando perfiles deportivos</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-12 text-destructive">
-        Error al cargar perfiles deportivos: {(error as Error).message}
-        <Button variant="outline" className="ml-4" onClick={() => refetch()}>
+      <div className="flex flex-col items-start gap-3 rounded-xl bg-card p-6">
+        <p className="text-sm text-foreground">
+          No se pudieron cargar los perfiles deportivos.
+        </p>
+        <p className="text-[0.8125rem] text-muted-foreground">
+          {(error as Error).message}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
           Reintentar
         </Button>
       </div>
@@ -116,41 +121,50 @@ export function SportProfilesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Perfiles deportivos</h1>
-          <p className="text-muted-foreground">Objetivos y datos de entrenamiento por socio</p>
+          <h1 className="text-[1.5rem] leading-tight font-semibold tracking-[-0.02em] text-foreground">
+            Perfiles deportivos
+          </h1>
+          <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+            Objetivos, nivel y seguimiento de entrenamiento por socio.
+          </p>
         </div>
         <Button onClick={openCreate}>
-          <Plus className="size-4 mr-2" />
+          <Plus className="size-4" strokeWidth={2} />
           Nuevo perfil
         </Button>
-      </div>
+      </header>
 
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle>Lista de perfiles ({filtered.length})</CardTitle>
-          <div className="relative max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <section className="overflow-hidden rounded-xl bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:w-[19rem]">
+            <Search
+              className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
+              strokeWidth={1.75}
+            />
             <Input
-              placeholder="Buscar por socio, objetivo, nivel..."
+              placeholder="Buscar por socio, objetivo o nivel"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
+              className="h-9 pl-9"
+              aria-label="Buscar perfiles deportivos"
             />
           </div>
-        </CardHeader>
-        <CardContent>
-          <SportProfilesTable
-            profiles={filtered}
-            getUserLabel={userLabel}
-            onView={(p) => setViewingId(p.id)}
-            onEdit={openEdit}
-            onDelete={setDeletingProfile}
-          />
-        </CardContent>
-      </Card>
+          <p className="num text-xs text-text-muted">
+            {filtered.length} de {profiles?.length ?? 0} perfiles
+          </p>
+        </div>
+
+        <SportProfilesTable
+          profiles={filtered}
+          getUserLabel={userLabel}
+          onView={(p) => setViewingId(p.id)}
+          onEdit={openEdit}
+          onDelete={setDeletingProfile}
+        />
+      </section>
 
       <SportProfileFormDialog
         key={formOpen ? (editingProfile?.id ?? 'nuevo') : 'cerrado'}

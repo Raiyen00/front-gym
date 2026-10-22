@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
 
-import { deleteUser, enableUser, getUser, updateUser } from '@/features/users/api'
+import { createUser, deleteUser, enableUser, getUser, updateUser } from '@/features/users/api'
 import { server } from '@/test/msw/server'
 
 const BASE = 'http://127.0.0.1:8000'
@@ -19,6 +19,42 @@ const USER = {
 }
 
 describe('users api (admin)', () => {
+  it('createUser hace POST /auth/register con los datos del socio', async () => {
+    let method = ''
+    let path = ''
+    let payload: Record<string, unknown> = {}
+
+    server.use(
+      http.post(`${BASE}/auth/register`, async ({ request }) => {
+        method = request.method
+        path = new URL(request.url).pathname
+        payload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(USER, { status: 201 })
+      }),
+    )
+
+    const created = await createUser({
+      email: 'ana@test.com',
+      password: 'secreta123',
+      name: 'Ana',
+      lastname: 'Gómez',
+      dni: '38999888',
+      phone: '1145678901',
+    })
+
+    expect(method).toBe('POST')
+    expect(path).toBe('/auth/register')
+    expect(payload).toEqual({
+      email: 'ana@test.com',
+      password: 'secreta123',
+      name: 'Ana',
+      lastname: 'Gómez',
+      dni: '38999888',
+      phone: '1145678901',
+    })
+    expect(created.id).toBe(7)
+  })
+
   it('getUser hace GET /users/{id}', async () => {
     let path = ''
     server.use(
