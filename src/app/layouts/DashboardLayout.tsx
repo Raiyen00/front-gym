@@ -196,8 +196,9 @@ export function DashboardLayout() {
         <div className="flex-1 overflow-y-auto px-3 py-6">
           <NavLinks />
         </div>
-        <div className="shrink-0 px-4 py-4">
-          <div className="flex items-center justify-between gap-2">
+        <div className="shrink-0 border-t border-border px-4 py-4">
+          <UserFooter />
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/70 pt-3">
             <span className="text-[0.6875rem] text-text-muted">v0.1</span>
             <ApiUrlBadge />
           </div>

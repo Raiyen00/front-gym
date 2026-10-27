@@ -6,8 +6,10 @@ import { RequireRole } from '@/routes/guards/RequireRole'
 import { AuthPage } from '@/routes/AuthPage'
 import { DashboardPage } from '@/routes/DashboardPage'
 import { NotFoundPage } from '@/routes/NotFoundPage'
-import { PlaceholderPage } from '@/routes/PlaceholderPage'
 import { UsersPage } from '@/features/users/components/UsersPage'
+import { ExercisesPage } from '@/features/exercises/components/ExercisesPage'
+import { RoutinesPage } from '@/features/routines/components/RoutinesPage'
+import { RoutineDetailPage } from '@/features/routines/components/RoutineDetailPage'
 import { ProfilePage } from '@/features/users/components/ProfilePage'
 import { SportProfilesPage } from '@/features/sportProfiles/components/SportProfilesPage'
 import { MySportProfilePage } from '@/features/sportProfiles/components/MySportProfilePage'
@@ -35,7 +37,7 @@ export function AppRouter() {
             path="/ejercicios"
             element={
               <RequireRole roles={['admin', 'profesor']}>
-                <PlaceholderPage title="Ejercicios" />
+                <ExercisesPage />
               </RequireRole>
             }
           />
@@ -43,7 +45,15 @@ export function AppRouter() {
             path="/rutinas"
             element={
               <RequireRole roles={['admin', 'profesor', 'cliente']}>
-                <PlaceholderPage title="Rutinas" />
+                <RoutinesPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/rutinas/:id"
+            element={
+              <RequireRole roles={['admin', 'profesor', 'cliente']}>
+                <RoutineDetailPage />
               </RequireRole>
             }
           />

@@ -66,3 +66,24 @@ export const USER_STATE_LABELS: Record<UserState, string> = {
   pendiente_habilitacion: 'Pendiente de habilitación',
   habilitado_entrenar: 'Habilitado para entrenar',
 }
+
+export const DIAS_SEMANA = [
+  'lunes',
+  'martes',
+  'miercoles',
+  'jueves',
+  'viernes',
+  'sabado',
+  'domingo',
+] as const
+export type DiaSemana = (typeof DIAS_SEMANA)[number]
+
+export const DIA_SEMANA_LABELS: Record<DiaSemana, string> = {
+  lunes: 'Lunes',
+  martes: 'Martes',
+  miercoles: 'Miércoles',
+  jueves: 'Jueves',
+  viernes: 'Viernes',
+  sabado: 'Sábado',
+  domingo: 'Domingo',
+}

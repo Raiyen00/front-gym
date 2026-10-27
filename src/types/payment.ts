@@ -12,6 +12,14 @@ export interface Payment {
   expiration_date: string
 }
 
+/**
+ * Forma cruda que puede devolver la API: los `Decimal` de Pydantic a veces
+ * viajan como string. La capa de API normaliza a `Payment`.
+ */
+export type PaymentWire = Omit<Payment, 'amount'> & {
+  amount: number | string
+}
+
 /** Espejo de `PaymentCreate`. */
 export interface PaymentCreate {
   user_id: number

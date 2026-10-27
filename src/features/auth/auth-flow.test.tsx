@@ -22,6 +22,7 @@ const USER = {
 
 beforeEach(() => {
   localStorage.clear()
+  window.history.pushState({}, '', '/login')
 })
 
 describe('flujo de autenticación', () => {
@@ -40,8 +41,10 @@ describe('flujo de autenticación', () => {
     await user.type(screen.getByLabelText('Contraseña'), 'secreta123')
     await user.click(screen.getByRole('button', { name: 'Ingresar al sistema' }))
 
-    expect(await screen.findByText('¡Hola, Ana!')).toBeInTheDocument()
-    expect(screen.getByText('Activo')).toBeInTheDocument()
+    expect(await screen.findByText('Hola, Ana')).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
+    expect(screen.queryByText(/Token de autorización/)).not.toBeInTheDocument()
+    expect((await screen.findAllByText('Activo')).length).toBeGreaterThan(0)
     expect(localStorage.getItem('gymsass_token')).toBe('jwt-abc')
   })
 
@@ -51,7 +54,21 @@ describe('flujo de autenticación', () => {
 
     render(<App />)
 
-    expect(await screen.findByText('¡Hola, Ana!')).toBeInTheDocument()
+    expect(await screen.findByText('Hola, Ana')).toBeInTheDocument()
+  })
+
+  it('muestra y oculta la contraseña con el botón del ojo', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const password = screen.getByLabelText('Contraseña')
+    expect(password).toHaveAttribute('type', 'password')
+
+    await user.click(screen.getByRole('button', { name: 'Mostrar contraseña' }))
+    expect(password).toHaveAttribute('type', 'text')
+
+    await user.click(screen.getByRole('button', { name: 'Ocultar contraseña' }))
+    expect(password).toHaveAttribute('type', 'password')
   })
 
   it('muestra el error de credenciales (401)', async () => {
