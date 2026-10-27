@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { registerSchema, type RegisterFormValues } from '@/features/auth/schema'
 import { useAuth } from '@/features/auth/useAuth'
 import { FormAlert, type FormAlertType } from '@/features/auth/components/FormAlert'
@@ -77,7 +78,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
           Alta de nuevo socio
         </h1>
         <p className="mt-1.5 text-[0.8125rem] text-muted-foreground">
-          Registrá tus datos personales para darte de alta en el gimnasio
+          Completá tus datos para crear la cuenta de socio.
         </p>
       </div>
 
@@ -181,8 +182,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="Mínimo 8 caracteres"
                       autoComplete="new-password"
                       {...field}
@@ -199,8 +199,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
                 <FormItem>
                   <FormLabel>Confirmar contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="Repetí contraseña"
                       autoComplete="new-password"
                       {...field}

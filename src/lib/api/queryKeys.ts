@@ -26,6 +26,8 @@ export const queryKeys = {
     all: ['routines'] as const,
     me: ['routines', 'me'] as const,
     detail: (id: number) => ['routines', id] as const,
+    exercises: (routineId: number) =>
+      ['routines', routineId, 'exercises'] as const,
   },
   payments: {
     all: ['payments'] as const,

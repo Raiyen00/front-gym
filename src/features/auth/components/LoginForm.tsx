@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { loginSchema, type LoginFormValues } from '@/features/auth/schema'
 import { useAuth } from '@/features/auth/useAuth'
 import { FormAlert, type FormAlertType } from '@/features/auth/components/FormAlert'
@@ -60,7 +61,7 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
           Ingreso al sistema
         </h1>
         <p className="mt-1.5 text-[0.8125rem] text-muted-foreground">
-          Completá tus credenciales para acceder a tu cuenta
+          Usá el correo con el que te registraste.
         </p>
       </div>
 
@@ -94,8 +95,7 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
               <FormItem className="mb-4">
                 <FormLabel>Contraseña</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
+                  <PasswordInput
                     placeholder="••••••••"
                     autoComplete="current-password"
                     {...field}

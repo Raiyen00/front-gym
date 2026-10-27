@@ -1,16 +1,32 @@
+import type { DiaSemana } from './enums'
 import type { Exercise } from './exercise'
 
 /** Espejo de `RoutineExerciseDetail`. */
 export interface RoutineExercise {
   id: number
-  day: string
+  /** Presente en las respuestas del backend; opcional para fixtures. */
+  routine_id?: number
+  exercise_id?: number
+  day: DiaSemana
   sets: number
   repetitions: string
   position: number
   rest: number
+  /** La API siempre lo devuelve anidado (selectinload). */
+  exercise: Exercise
+}
+
+/** Espejo de `RoutineExerciseResponse`. */
+export interface RoutineExerciseResponse {
+  id: number
+  routine_id: number
   exercise_id: number
-  /** Anidado cuando la API lo incluya (Etapa 4 del plan de la API). */
-  exercise?: Exercise
+  day: DiaSemana
+  sets: number
+  repetitions: string
+  position: number
+  rest: number
+  exercise: Exercise
 }
 
 /** Espejo de `RoutineResponse`. */
@@ -40,9 +56,9 @@ export interface RoutineUpdate {
   state?: boolean
 }
 
-/** Espejo de `RoutineExerciseCreate`. */
+/** Body de POST /routines/{routine_id}/exercises.
+ *  El `routine_id` viene ÚNICAMENTE en la URL, NO en el body. */
 export interface RoutineExerciseCreate {
-  routine_id: number
   exercise_id: number
   day: string
   sets: number
@@ -51,5 +67,13 @@ export interface RoutineExerciseCreate {
   rest: number
 }
 
-/** `RoutineExerciseUpdate` (Etapa 4 del plan de la API). */
-export type RoutineExerciseUpdate = Partial<Omit<RoutineExerciseCreate, 'routine_id'>>
+/** `RoutineExerciseUpdate` (Etapa 4 del plan de la API).
+ *  `exercise_id` es opcional: permite cambiar el ejercicio del renglón sin borrarlo. */
+export interface RoutineExerciseUpdate {
+  exercise_id?: number
+  day?: string
+  sets?: number
+  repetitions?: string
+  position?: number
+  rest?: number
+}

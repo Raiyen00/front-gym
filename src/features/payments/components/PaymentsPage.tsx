@@ -7,7 +7,14 @@ import { Input } from '@/components/ui/input'
 import { PaymentsTable } from '@/features/payments/components/PaymentsTable'
 import { PaymentFormDialog } from '@/features/payments/components/PaymentFormDialog'
 import { PaymentDetailDialog } from '@/features/payments/components/PaymentDetailDialog'
+import { MonthlySeriesCard } from '@/features/payments/components/MonthlySeriesCard'
+import { ExpiringMembershipsCard } from '@/features/payments/components/ExpiringMembershipsCard'
 import { useCreatePayment, usePayments } from '@/features/payments/queries'
+import {
+  buildMonthlySeries,
+  EXPIRING_WINDOW_DAYS,
+  getExpiringMemberships,
+} from '@/features/payments/insights'
 import { countExpiredMemberships } from '@/features/payments/membership'
 import { useUsers } from '@/features/users/queries'
 import { getErrorMessage } from '@/features/auth/utils'
@@ -41,11 +48,13 @@ export function PaymentsPage() {
       date.getMonth() === now.getMonth()
     )
   })
-  const collectedThisMonth = monthPayments.reduce(
-    (total, payment) => total + payment.amount,
-    0,
-  )
+  const collectedThisMonth = monthPayments.reduce((total, payment) => {
+    const amount = Number(payment.amount)
+    return Number.isFinite(amount) ? total + amount : total
+  }, 0)
   const expiredMemberships = countExpiredMemberships(allPayments, now)
+  const expiringMemberships = getExpiringMemberships(allPayments, now)
+  const monthlySeries = buildMonthlySeries(allPayments, { now })
 
   const filtered = allPayments
     .filter((payment) => {
@@ -111,6 +120,12 @@ export function PaymentsPage() {
       lead: false,
     },
     {
+      label: 'Por vencer',
+      value: String(expiringMemberships.length),
+      caption: `próximos ${EXPIRING_WINDOW_DAYS} días`,
+      lead: false,
+    },
+    {
       label: 'Membresías vencidas',
       value: String(expiredMemberships),
       caption: 'socios sin cuota vigente',
@@ -136,17 +151,11 @@ export function PaymentsPage() {
       </header>
 
       <section
-        className="grid overflow-hidden rounded-xl bg-card sm:grid-cols-3"
+        className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-border lg:grid-cols-4"
         aria-label="Resumen de pagos"
       >
-        {stats.map((stat, index) => (
-          <div
-            key={stat.label}
-            className={cn(
-              'px-5 py-5',
-              index > 0 && 'border-t border-border sm:border-t-0 sm:border-l',
-            )}
-          >
+        {stats.map((stat) => (
+          <div key={stat.label} className="bg-card px-5 py-5">
             <p className="text-xs text-text-muted">{stat.label}</p>
             <p
               className={cn(
@@ -161,7 +170,34 @@ export function PaymentsPage() {
         ))}
       </section>
 
-      <section className="overflow-hidden rounded-xl bg-card">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <MonthlySeriesCard
+          title="Recaudación mensual"
+          caption="Últimos 6 meses"
+          series={monthlySeries}
+          getValue={(stat) => stat.collected}
+          formatValue={formatCurrency}
+        />
+        <MonthlySeriesCard
+          title="Clientes activos por mes"
+          caption="Socios que pagaron"
+          series={monthlySeries}
+          getValue={(stat) => stat.clients}
+          formatValue={(value) => `${value} ${value === 1 ? 'socio' : 'socios'}`}
+          tone="ring"
+        />
+      </div>
+
+      <ExpiringMembershipsCard
+        payments={allPayments}
+        getUserLabel={userLabel}
+        now={now}
+      />
+
+      <section
+        className="overflow-hidden rounded-xl bg-card"
+        aria-label="Historial de pagos"
+      >
         <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <CreditCard

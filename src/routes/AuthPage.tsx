@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { AuthTabs, type AuthTab } from '@/features/auth/components/AuthTabs'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { RegisterForm } from '@/features/auth/components/RegisterForm'
-import { SessionView } from '@/features/auth/components/SessionView'
 import { useAuth } from '@/features/auth/useAuth'
 
 export function AuthPage() {
@@ -24,11 +24,8 @@ export function AuthPage() {
   }
 
   if (status === 'authenticated') {
-    return (
-      <AuthLayout>
-        <SessionView />
-      </AuthLayout>
-    )
+    // Con sesión activa no mostramos una tarjeta intermedia: directo al panel.
+    return <Navigate to="/dashboard" replace />
   }
 
   function handleRegistered(email: string) {

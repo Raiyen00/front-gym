@@ -36,6 +36,19 @@ describe('payments api', () => {
     expect(payments[0]?.id).toBe(9)
   })
 
+  it('normaliza amount a número aunque la API lo mande como string', async () => {
+    server.use(
+      http.get(`${BASE}/payment`, () =>
+        HttpResponse.json([{ ...PAYMENT, amount: '15000.00' }]),
+      ),
+    )
+
+    const payments = await getPayments()
+
+    expect(payments[0]?.amount).toBe(15000)
+    expect(typeof payments[0]?.amount).toBe('number')
+  })
+
   it('getMyPayments hace GET /payment/me', async () => {
     let path = ''
     server.use(

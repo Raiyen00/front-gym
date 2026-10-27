@@ -8,7 +8,7 @@ describe('App', () => {
     render(<App />)
     expect(screen.getByText('GymSasS')).toBeInTheDocument()
     expect(
-      screen.getByText('Sistema de Gestión deportiva y control de socios'),
+      screen.getByText('Socios, cuotas y rutinas en un mismo lugar.'),
     ).toBeInTheDocument()
   })
 })
