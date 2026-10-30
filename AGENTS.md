@@ -5,7 +5,7 @@
 - Frontend de GymSasS: SPA en React 19 + TypeScript (Vite) que consume una API FastAPI externa. En este repo no hay código de backend.
 - Flujo de entrada: `src/main.tsx` -> `src/App.tsx` -> `src/app/providers.tsx` -> `src/app/router.tsx`. El orden de los providers (QueryClient -> Auth -> BrowserRouter) importa porque auth usa el query client.
 - Los copys de UI, comentarios, mensajes de validación y errores están en español (rioplatense). Mantenerlos así.
-- Al iniciar siempre lee MEMORY.md
+- Al iniciar siempre lee MEMORY.md (notas locales, no versionadas; si no existe, seguí con este archivo y si no existe , crealo)
 
 ## Comandos
 
