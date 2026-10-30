@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { userUpdateSchema, type UserUpdateFormValues } from '@/features/users/schema'
+import { buildUserUpdate } from '@/features/users/payload'
 import { useUpdateUser } from '@/features/users/queries'
 import { getErrorMessage } from '@/features/auth/utils'
 import { ROL_LABELS, USER_STATE_LABELS } from '@/types/enums'
@@ -40,8 +41,21 @@ export function ProfilePage() {
 
   async function onSubmit(values: UserUpdateFormValues) {
     setAlert(null)
+    const payload = buildUserUpdate(values, form.formState.dirtyFields)
+    if (Object.keys(payload).length === 0) {
+      toast.info('No hay cambios para guardar')
+      return
+    }
+
     try {
-      const updated = await updateUser.mutateAsync(values)
+      const updated = await updateUser.mutateAsync(payload)
+      form.reset({
+        name: updated.name,
+        lastname: updated.lastname,
+        dni: updated.dni,
+        phone: updated.phone ?? '',
+        email: updated.email,
+      })
       updateCurrentUser(updated)
       setAlert({ type: 'success', message: 'Perfil actualizado correctamente' })
       toast.success('Perfil actualizado')

@@ -30,6 +30,8 @@ export const STORAGE_KEYS = {
 export const ENDPOINTS = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
+  /** PATCH autenticado: actualiza la contraseña del usuario logueado. */
+  PASSWORD: '/auth/password',
   ME: '/users/me',
   USERS: '/users',
   SPORT_PROFILES: '/sport-profiles',

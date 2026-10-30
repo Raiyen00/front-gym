@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { PasswordPolicyNote } from '@/components/PasswordPolicyNote'
 import {
   userCreateSchema,
   type UserCreateFormValues,
@@ -185,7 +186,7 @@ export function UserCreateDialog({
               )}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="password"
@@ -223,6 +224,8 @@ export function UserCreateDialog({
                 )}
               />
             </div>
+
+            <PasswordPolicyNote />
 
             <DialogFooter>
               <Button

@@ -24,6 +24,12 @@ export interface UserCreate {
   phone: string
 }
 
+/** Espejo de `UserPasswordUpdate` (PATCH /auth/password). */
+export interface UserPasswordUpdate {
+  old_password: string
+  new_password: string
+}
+
 /**
  * Actualización de usuario. Sin `rol` ni `password`
  * (ver plan.md de la API, Etapa 1).
