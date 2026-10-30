@@ -1,5 +1,10 @@
 import { z } from 'zod'
 
+import {
+  currentPasswordSchema,
+  newPasswordSchema,
+} from '@/lib/passwordPolicy'
+
 export const loginSchema = z.object({
   email: z.email('Ingresá un correo electrónico válido'),
   password: z.string().min(1, 'Ingresá tu contraseña'),
@@ -25,10 +30,7 @@ export const registerSchema = z
       .min(9, 'Mínimo 9 dígitos')
       .max(15, 'Máximo 15 dígitos'),
     email: z.email('Ingresá un correo electrónico válido'),
-    password: z
-      .string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .max(128, 'Máximo 128 caracteres'),
+    password: newPasswordSchema,
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -37,3 +39,44 @@ export const registerSchema = z
   })
 
 export type RegisterFormValues = z.infer<typeof registerSchema>
+
+export const changePasswordSchema = z
+  .object({
+    oldPassword: currentPasswordSchema,
+    newPassword: newPasswordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Las contraseñas no coinciden',
+  })
+  .refine((data) => data.newPassword !== data.oldPassword, {
+    path: ['newPassword'],
+    message: 'La nueva contraseña debe ser distinta de la actual',
+  })
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>
+
+/**
+ * Cambio de contraseña desde la pantalla de login. Pide el correo porque
+ * todavía no hay sesión: se valida con `POST /auth/login` antes del PATCH.
+ */
+export const loginChangePasswordSchema = z
+  .object({
+    email: z.email('Ingresá un correo electrónico válido'),
+    oldPassword: currentPasswordSchema,
+    newPassword: newPasswordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Las contraseñas no coinciden',
+  })
+  .refine((data) => data.newPassword !== data.oldPassword, {
+    path: ['newPassword'],
+    message: 'La nueva contraseña debe ser distinta de la actual',
+  })
+
+export type LoginChangePasswordFormValues = z.infer<
+  typeof loginChangePasswordSchema
+>

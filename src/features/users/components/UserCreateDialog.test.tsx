@@ -23,8 +23,8 @@ describe('UserCreateDialog', () => {
     await user.type(screen.getByLabelText('DNI'), '38999888')
     await user.type(screen.getByLabelText('Teléfono'), '1145678901')
     await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
-    await user.type(screen.getByLabelText('Contraseña inicial'), 'secreta123')
-    await user.type(screen.getByLabelText('Confirmar contraseña'), 'secreta123')
+    await user.type(screen.getByLabelText('Contraseña inicial'), 'Secreta123')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Secreta123')
 
     await user.click(screen.getByRole('button', { name: 'Crear socio' }))
 
@@ -35,8 +35,11 @@ describe('UserCreateDialog', () => {
       dni: '38999888',
       phone: '1145678901',
       email: 'ana@test.com',
-      password: 'secreta123',
+      password: 'Secreta123',
     })
+    expect(
+      screen.getByText(/Mínimo 8 caracteres, al menos una mayúscula/),
+    ).toBeInTheDocument()
   })
 
   it('no envía el formulario si las contraseñas no coinciden', async () => {
@@ -52,8 +55,8 @@ describe('UserCreateDialog', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText('Contraseña inicial'), 'secreta123')
-    await user.type(screen.getByLabelText('Confirmar contraseña'), 'otraclave123')
+    await user.type(screen.getByLabelText('Contraseña inicial'), 'Secreta123')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Otraclave123')
     await user.click(screen.getByRole('button', { name: 'Crear socio' }))
 
     expect(

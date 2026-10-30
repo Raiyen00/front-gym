@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
 
-import { login, me, register } from '@/features/auth/api'
+import { login, me, register, updatePassword } from '@/features/auth/api'
 import { server } from '@/test/msw/server'
 
 const BASE = 'http://127.0.0.1:8000'
@@ -69,6 +69,37 @@ describe('auth api', () => {
       lastname: 'Gómez',
       dni: '38999888',
       phone: '1145678901',
+    })
+  })
+
+  it('updatePassword hace PATCH a /auth/password con el body del backend', async () => {
+    let payload: Record<string, unknown> = {}
+
+    server.use(
+      http.patch(`${BASE}/auth/password`, async ({ request }) => {
+        payload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({
+          id: 7,
+          email: 'ana@test.com',
+          name: 'Ana',
+          lastname: 'Gómez',
+          dni: '38999888',
+          phone: '1145678901',
+          rol: 'cliente',
+          state: 'activo',
+          register_date: '2026-01-01T00:00:00Z',
+        })
+      }),
+    )
+
+    await updatePassword({
+      old_password: 'secreta123',
+      new_password: 'nueva123',
+    })
+
+    expect(payload).toEqual({
+      old_password: 'secreta123',
+      new_password: 'nueva123',
     })
   })
 

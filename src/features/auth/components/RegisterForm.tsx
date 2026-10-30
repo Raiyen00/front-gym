@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
+import { PasswordPolicyNote } from '@/components/PasswordPolicyNote'
 import { registerSchema, type RegisterFormValues } from '@/features/auth/schema'
 import { useAuth } from '@/features/auth/useAuth'
 import { FormAlert, type FormAlertType } from '@/features/auth/components/FormAlert'
@@ -174,7 +175,7 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
             )}
           />
 
-          <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 items-start gap-3.5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="password"
@@ -210,6 +211,8 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
               )}
             />
           </div>
+
+          <PasswordPolicyNote className="mt-2" />
 
           <Button
             type="submit"

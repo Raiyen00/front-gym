@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -24,6 +24,13 @@ beforeEach(() => {
   localStorage.clear()
   window.history.pushState({}, '', '/login')
 })
+
+async function renderLoggedIn() {
+  localStorage.setItem('gymsass_token', 'jwt-abc')
+  server.use(http.get(`${BASE}/users/me`, () => HttpResponse.json(USER)))
+  render(<App />)
+  await screen.findByText('Hola, Ana')
+}
 
 describe('flujo de autenticación', () => {
   it('inicia sesión e hidrata el usuario con /users/me', async () => {
@@ -107,8 +114,8 @@ describe('flujo de autenticación', () => {
     await user.type(screen.getByLabelText('DNI'), '38999888')
     await user.type(screen.getByLabelText('Teléfono'), '1145678901')
     await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
-    await user.type(screen.getByLabelText('Contraseña'), 'secreta123')
-    await user.type(screen.getByLabelText('Confirmar contraseña'), 'secreta123')
+    await user.type(screen.getByLabelText('Contraseña'), 'Secreta123')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Secreta123')
     await user.click(screen.getByRole('button', { name: 'Crear cuenta de socio' }))
 
     expect(
@@ -120,7 +127,7 @@ describe('flujo de autenticación', () => {
       dni: '38999888',
       phone: '1145678901',
       email: 'ana@test.com',
-      password: 'secreta123',
+      password: 'Secreta123',
     })
   })
 
@@ -134,12 +141,220 @@ describe('flujo de autenticación', () => {
     await user.type(screen.getByLabelText('DNI'), '38999888')
     await user.type(screen.getByLabelText('Teléfono'), '1145678901')
     await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
-    await user.type(screen.getByLabelText('Contraseña'), 'secreta123')
-    await user.type(screen.getByLabelText('Confirmar contraseña'), 'otra-clave')
+    await user.type(screen.getByLabelText('Contraseña'), 'Secreta123')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Secreta124')
     await user.click(screen.getByRole('button', { name: 'Crear cuenta de socio' }))
 
     expect(
       await screen.findByText('Las contraseñas no coinciden'),
     ).toBeInTheDocument()
+  })
+
+  it('muestra la política y rechaza una contraseña sin mayúscula', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('tab', { name: 'Registrar socio' }))
+    expect(
+      screen.getByText(/Mínimo 8 caracteres, al menos una mayúscula/),
+    ).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Nombre'), 'Ana')
+    await user.type(screen.getByLabelText('Apellido'), 'Gómez')
+    await user.type(screen.getByLabelText('DNI'), '38999888')
+    await user.type(screen.getByLabelText('Teléfono'), '1145678901')
+    await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
+    await user.type(screen.getByLabelText('Contraseña'), 'secreta123')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'secreta123')
+    await user.click(screen.getByRole('button', { name: 'Crear cuenta de socio' }))
+
+    expect(
+      await screen.findByText(
+        'La contraseña debe incluir al menos una mayúscula',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('cambia la contraseña y envía old_password/new_password', async () => {
+    let payload: Record<string, unknown> = {}
+    await renderLoggedIn()
+    server.use(
+      http.patch(`${BASE}/auth/password`, async ({ request }) => {
+        payload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(USER)
+      }),
+    )
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Cambiar contraseña' }))
+    await user.type(screen.getByLabelText('Contraseña actual'), 'secreta123')
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'Nueva1234')
+    await user.type(
+      screen.getByLabelText('Confirmar nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.click(
+      screen.getByRole('button', { name: 'Actualizar contraseña' }),
+    )
+
+    expect(
+      await screen.findByText('Contraseña actualizada correctamente'),
+    ).toBeInTheDocument()
+    expect(payload).toEqual({
+      old_password: 'secreta123',
+      new_password: 'Nueva1234',
+    })
+  })
+
+  it('muestra el error del backend si la contraseña actual es incorrecta', async () => {
+    await renderLoggedIn()
+    server.use(
+      http.patch(`${BASE}/auth/password`, () =>
+        HttpResponse.json({ detail: 'Contraseña incorrecta' }, { status: 400 }),
+      ),
+    )
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Cambiar contraseña' }))
+    await user.type(screen.getByLabelText('Contraseña actual'), 'incorrecta')
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'Nueva1234')
+    await user.type(
+      screen.getByLabelText('Confirmar nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.click(
+      screen.getByRole('button', { name: 'Actualizar contraseña' }),
+    )
+
+    const matches = await screen.findAllByText('Contraseña incorrecta')
+    expect(matches.length).toBeGreaterThan(0)
+  })
+
+  it('valida que la confirmación coincida antes de llamar a la API', async () => {
+    await renderLoggedIn()
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Cambiar contraseña' }))
+    await user.type(screen.getByLabelText('Contraseña actual'), 'secreta123')
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'Nueva1234')
+    await user.type(
+      screen.getByLabelText('Confirmar nueva contraseña'),
+      'Nueva1235',
+    )
+    await user.click(
+      screen.getByRole('button', { name: 'Actualizar contraseña' }),
+    )
+
+    expect(
+      await screen.findByText('Las contraseñas no coinciden'),
+    ).toBeInTheDocument()
+  })
+
+  it('cambia la contraseña desde el login y deja la sesión iniciada', async () => {
+    let loginCalls = 0
+    let patchAuthorization: string | null = null
+    let patchPayload: Record<string, unknown> = {}
+
+    server.use(
+      http.post(`${BASE}/auth/login`, () => {
+        loginCalls += 1
+        return HttpResponse.json({
+          access_token: `jwt-${loginCalls}`,
+          token_type: 'bearer',
+        })
+      }),
+      http.patch(`${BASE}/auth/password`, async ({ request }) => {
+        patchAuthorization = request.headers.get('authorization')
+        patchPayload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(USER)
+      }),
+      http.get(`${BASE}/users/me`, () => HttpResponse.json(USER)),
+    )
+
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
+    await user.click(
+      screen.getByRole('button', { name: '¿Olvidaste tu contraseña?' }),
+    )
+
+    const dialog = await screen.findByRole('dialog')
+    const dialogQueries = within(dialog)
+
+    expect(dialogQueries.getByLabelText('Correo electrónico')).toHaveValue(
+      'ana@test.com',
+    )
+    await user.type(
+      dialogQueries.getByLabelText('Contraseña actual'),
+      'secreta123',
+    )
+    await user.type(
+      dialogQueries.getByLabelText('Nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.type(
+      dialogQueries.getByLabelText('Confirmar nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.click(
+      dialogQueries.getByRole('button', { name: 'Cambiar contraseña' }),
+    )
+
+    expect(await screen.findByText('Hola, Ana')).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
+    expect(patchAuthorization).toBe('Bearer jwt-1')
+    expect(patchPayload).toEqual({
+      old_password: 'secreta123',
+      new_password: 'Nueva1234',
+    })
+    // El primer login valida la identidad; el segundo abre la sesión nueva.
+    expect(loginCalls).toBe(2)
+  })
+
+  it('no llama al PATCH si la contraseña actual es incorrecta', async () => {
+    let patchCalls = 0
+
+    server.use(
+      http.post(`${BASE}/auth/login`, () =>
+        HttpResponse.json({ detail: 'Contraseña incorrecta' }, { status: 401 }),
+      ),
+      http.patch(`${BASE}/auth/password`, () => {
+        patchCalls += 1
+        return HttpResponse.json(USER)
+      }),
+    )
+
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByLabelText('Correo electrónico'), 'ana@test.com')
+    await user.click(
+      screen.getByRole('button', { name: '¿Olvidaste tu contraseña?' }),
+    )
+
+    const dialog = await screen.findByRole('dialog')
+    const dialogQueries = within(dialog)
+
+    await user.type(
+      dialogQueries.getByLabelText('Contraseña actual'),
+      'incorrecta',
+    )
+    await user.type(
+      dialogQueries.getByLabelText('Nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.type(
+      dialogQueries.getByLabelText('Confirmar nueva contraseña'),
+      'Nueva1234',
+    )
+    await user.click(
+      dialogQueries.getByRole('button', { name: 'Cambiar contraseña' }),
+    )
+
+    const matches = await screen.findAllByText('Contraseña incorrecta')
+    expect(matches.length).toBeGreaterThan(0)
+    expect(patchCalls).toBe(0)
+    expect(window.location.pathname).toBe('/login')
   })
 })

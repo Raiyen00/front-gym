@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
+import { FormAlert, type FormAlertType } from '@/features/auth/components/FormAlert'
+import { LoginChangePasswordDialog } from '@/features/auth/components/LoginChangePasswordDialog'
 import { loginSchema, type LoginFormValues } from '@/features/auth/schema'
 import { useAuth } from '@/features/auth/useAuth'
-import { FormAlert, type FormAlertType } from '@/features/auth/components/FormAlert'
 import { getErrorMessage } from '@/features/auth/utils'
 
 interface LoginFormProps {
@@ -26,6 +27,7 @@ interface LoginFormProps {
 
 export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
   const { login } = useAuth()
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const [alert, setAlert] = useState<{ type: FormAlertType; message: string } | null>(
     null,
   )
@@ -106,6 +108,16 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
             )}
           />
 
+          <div className="-mt-2 text-right">
+            <button
+              type="button"
+              onClick={() => setChangePasswordOpen(true)}
+              className="rounded-sm text-xs font-medium text-state-positive-ink hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+
           <Button
             type="submit"
             className="mt-6 h-10 w-full"
@@ -118,6 +130,12 @@ export function LoginForm({ defaultEmail = '' }: LoginFormProps) {
           </Button>
         </form>
       </Form>
+
+      <LoginChangePasswordDialog
+        open={changePasswordOpen}
+        defaultEmail={form.getValues('email')}
+        onOpenChange={setChangePasswordOpen}
+      />
     </>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LogOut, Menu, X } from 'lucide-react'
+import { KeyRound, LogOut, Menu, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -13,6 +13,7 @@ import {
   type NavItem,
 } from '@/config/nav'
 import { ROL_LABELS } from '@/types/enums'
+import { ChangePasswordDialog } from '@/features/auth/components/ChangePasswordDialog'
 import { useAuth } from '@/features/auth/useAuth'
 import { cn } from '@/lib/utils'
 
@@ -91,6 +92,7 @@ function Initials({ name, lastname }: { name?: string; lastname?: string }) {
 
 function UserFooter() {
   const { user, logout } = useAuth()
+  const [passwordOpen, setPasswordOpen] = useState(false)
 
   function handleLogout() {
     logout()
@@ -98,26 +100,42 @@ function UserFooter() {
   }
 
   return (
-    <div className="flex items-center gap-2.5">
-      <Initials name={user?.name} lastname={user?.lastname} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[0.8125rem] font-medium text-foreground">
-          {user ? `${user.name} ${user.lastname}` : 'Usuario'}
-        </p>
-        <p className="truncate text-xs text-text-muted">
-          {user ? ROL_LABELS[user.rol] : ''}
-        </p>
+    <>
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onOpenChange={setPasswordOpen}
+      />
+      <div className="flex items-center gap-2.5">
+        <Initials name={user?.name} lastname={user?.lastname} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[0.8125rem] font-medium text-foreground">
+            {user ? `${user.name} ${user.lastname}` : 'Usuario'}
+          </p>
+          <p className="truncate text-xs text-text-muted">
+            {user ? ROL_LABELS[user.rol] : ''}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setPasswordOpen(true)}
+          aria-label="Cambiar contraseña"
+          title="Cambiar contraseña"
+          className="text-text-muted hover:text-foreground"
+        >
+          <KeyRound className="size-4" strokeWidth={1.75} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={handleLogout}
+          aria-label="Cerrar sesión"
+          className="text-text-muted hover:text-foreground"
+        >
+          <LogOut className="size-4" strokeWidth={1.75} />
+        </Button>
       </div>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={handleLogout}
-        aria-label="Cerrar sesión"
-        className="text-text-muted hover:text-foreground"
-      >
-        <LogOut className="size-4" strokeWidth={1.75} />
-      </Button>
-    </div>
+    </>
   )
 }
 

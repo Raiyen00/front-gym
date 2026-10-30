@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { userUpdateSchema, type UserUpdateFormValues } from '@/features/users/schema'
+import { buildUserUpdate } from '@/features/users/payload'
 import type { User, UserUpdate } from '@/types/user'
 
 interface UserFormDialogProps {
@@ -62,13 +63,7 @@ export function UserFormDialog({
   }, [user, form])
 
   async function handleSubmit(values: UserUpdateFormValues) {
-    const dirty = form.formState.dirtyFields
-    const payload: UserUpdate = {}
-    if (dirty.name) payload.name = values.name
-    if (dirty.lastname) payload.lastname = values.lastname
-    if (dirty.dni) payload.dni = values.dni
-    if (dirty.phone) payload.phone = values.phone
-    if (dirty.email) payload.email = values.email
+    const payload = buildUserUpdate(values, form.formState.dirtyFields)
 
     if (Object.keys(payload).length === 0) {
       onOpenChange(false)

@@ -52,12 +52,12 @@ function renderPage() {
 }
 
 describe('ProfilePage (cliente edita sus propios datos)', () => {
-  it('hace PATCH /users/me solo con el campo modificado', async () => {
+  it('hace PATCH /users/{id} solo con el campo modificado', async () => {
     const user = userEvent.setup()
     let payload: Record<string, unknown> = {}
     let path = ''
     server.use(
-      http.patch(`${BASE}/users/me`, async ({ request }) => {
+      http.patch(`${BASE}/users/${USER.id}`, async ({ request }) => {
         path = new URL(request.url).pathname
         payload = (await request.json()) as Record<string, unknown>
         return HttpResponse.json({ ...USER, phone: '1199998888' })
@@ -71,7 +71,7 @@ describe('ProfilePage (cliente edita sus propios datos)', () => {
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     await waitFor(() => expect(payload).toEqual({ phone: '1199998888' }))
-    expect(path).toBe('/users/me')
+    expect(path).toBe(`/users/${USER.id}`)
     expect(updateCurrentUser).toHaveBeenCalledWith(
       expect.objectContaining({ phone: '1199998888' }),
     )
@@ -84,7 +84,7 @@ describe('ProfilePage (cliente edita sus propios datos)', () => {
     const user = userEvent.setup()
     let called = false
     server.use(
-      http.patch(`${BASE}/users/me`, () => {
+      http.patch(`${BASE}/users/${USER.id}`, () => {
         called = true
         return HttpResponse.json(USER)
       }),

@@ -1,6 +1,6 @@
 import { request } from '@/lib/api/client'
 import { ENDPOINTS } from '@/lib/api/config'
-import type { User, UserCreate } from '@/types/user'
+import type { User, UserCreate, UserPasswordUpdate } from '@/types/user'
 
 export interface LoginResponse {
   access_token: string
@@ -35,5 +35,19 @@ export function register(data: UserCreate): Promise<User> {
     method: 'POST',
     body: data,
     auth: false,
+  })
+}
+
+/** PATCH /auth/password — cambia la contraseña del usuario autenticado. */
+export function updatePassword(
+  data: UserPasswordUpdate,
+  options: { token?: string } = {},
+): Promise<User> {
+  return request<User>(ENDPOINTS.PASSWORD, {
+    method: 'PATCH',
+    body: data,
+    headers: options.token
+      ? { Authorization: `Bearer ${options.token}` }
+      : undefined,
   })
 }

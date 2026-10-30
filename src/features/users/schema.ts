@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { newPasswordSchema } from '@/lib/passwordPolicy'
+
 export const userUpdateSchema = z.object({
   name: z
     .string()
@@ -43,10 +45,7 @@ export const userCreateSchema = z
       .min(9, 'Mínimo 9 dígitos')
       .max(15, 'Máximo 15 dígitos'),
     email: z.email('Ingresá un correo electrónico válido'),
-    password: z
-      .string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .max(128, 'Máximo 128 caracteres'),
+    password: newPasswordSchema,
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

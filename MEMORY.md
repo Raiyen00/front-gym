@@ -1,6 +1,6 @@
 # MEMORY.md — Contexto del proyecto GymSasS Frontend
 
-**Última actualización:** 2026-10-18
+**Última actualización:** 2026-10-30
 
 ---
 
@@ -31,7 +31,7 @@
 - `AuthContext`: `updateCurrentUser()` para reflejar la edición propia en sesión/header
 - Router actualizado: `/usuarios` → `UsersPage`, `/mi-perfil` → `ProfilePage`
 
-✅ **Tests:** 72 tests pasan (incluye `users/api.test.ts`, `sportProfiles/*`, `payments/*` y auth-flow para `state`)
+✅ **Tests:** 164 tests (33 archivos) — `npm test` verde al 2026-10-30
 
 ✅ **Build/Lint/Typecheck:** Todo pasa
 
@@ -55,6 +55,29 @@
 
 ---
 
+## ✅ Fase 8: Feature Exercises (Etapa 2 API)
+
+- `ENDPOINTS.EXERCISES = '/exercises'`
+- `src/features/exercises/`: `api.ts` (CRUD + filtro `?muscular_group=`), `queries.ts`, `schema.ts`, `payload.ts`
+- `components/`: `ExercisesPage` (`/ejercicios`, admin y profesor), `ExercisesTable`, `ExerciseFormDialog` (alta/edición), `ExerciseDetailDialog`, `DeleteExerciseDialog`
+- Tests: `api.test.ts` (método/path/body), `payload.test.ts`, `ExerciseFormDialog.test.tsx`
+
+---
+
+## ✅ Fase 10: Feature Routines (Etapa 4 API)
+
+- `ENDPOINTS.ROUTINES = '/routines'`; los renglones cuelgan de la rutina (`/routines/{id}/exercises`), las rutas viejas `/routine-exercises` ya no existen.
+- `src/features/routines/`:
+  - `api.ts`: cabecera (`getRoutines`, `getRoutine`, `createRoutine`, `updateRoutine`, `deleteRoutine`) + renglones (`createRoutineExercise`, `updateRoutineExercise`, `deleteRoutineExercise`)
+  - `queries.ts`: hooks con invalidación de `routines.*`
+  - `payload.ts`: alta de rutina y PATCH parcial de renglón (solo campos modificados; no permite cambiar el ejercicio)
+  - `schema.ts`, `grouping.ts` (agrupa lunes→domingo porque SQL ordena `day` alfabéticamente), `dates.ts`, `share.ts`
+  - `components/`: `RoutinesPage` (staff y cliente según rol), `StaffRoutinesView` (tabla + alta + activar/desactivar), `MyRoutinesView` (cliente, sección “Historial” para inactivas), `RoutineDetailPage` (`/rutinas/:id`), `RoutineExercisesByDay`, `RoutineFormDialog`, `RoutineExerciseFormDialog`, `DeleteRoutineDialog`, `DeleteRoutineExerciseDialog`, `RoutinePrintSheet`
+- Rutas: `/rutinas` y `/rutinas/:id` (admin, profesor, cliente). Nav: “Rutinas” para los tres roles.
+- Tests: `api.test.ts` (395 líneas, método/path/body exactos), `payload.test.ts`, `grouping.test.ts`, `share.test.ts`, `routines-flow.test.tsx`, `MyRoutinesView.test.tsx`, `StaffRoutinesView.test.tsx`, `RoutineExerciseFormDialog.test.tsx`
+
+---
+
 ## ✅ Fase 11: Feature Payments (Etapa 5 API)
 
 - `ENDPOINTS.PAYMENTS = '/payment'` (`lib/api/config.ts`) — **la API lo expone en singular**
@@ -65,7 +88,31 @@
   - `membership.ts`: `daysUntilExpiration`, `getPaymentStatus`, `isPaymentActive`, `getMembershipStatus`, `countExpiredMemberships` (cuenta socios por su último pago, no pagos sueltos)
   - `components/`: `PaymentsPage` (`/pagos`, admin, KPIs + búsqueda + alta + detalle), `MyMembershipPage` (`/mi-membresia`, cliente, estado + historial), `PaymentsTable`, `PaymentFormDialog`, `PaymentDetailDialog`, `PaymentDetails`
 - La API **no expone PATCH ni DELETE** de pagos → la UI no ofrece editar/eliminar
+- `insights.ts` + `insights.test.ts`: serie mensual de recaudación y conteo de membresías por vencer (cuenta socios por su último pago)
+- `MonthlySeriesCard` y `ExpiringMembershipsCard` en `/pagos`; `PaymentsPage.test.tsx` cubre KPIs y tarjetas
 - Router y nav: "Pagos" (admin) y "Mi membresía" (cliente)
+
+---
+
+## ✅ Auth: cambio de contraseña (2026-10-27)
+
+- Endpoint del back: `PATCH /auth/password` (autenticado) con JSON `{ old_password, new_password }`; devuelve `UserResponse`. 400 `"Contraseña incorrecta"` si la actual no coincide, 404 si el usuario no existe.
+- `ENDPOINTS.PASSWORD = '/auth/password'` (`lib/api/config.ts`).
+- `src/types/user.ts`: `UserPasswordUpdate` (espejo de `UserPasswordUpdate` de Pydantic).
+- `features/auth/api.ts`: `updatePassword(data)`.
+- `features/auth/queries.ts`: `useChangePassword()` (no invalida caché: el token sigue válido).
+- `src/lib/passwordPolicy.ts`: regla compartida para contraseñas nuevas (`newPasswordSchema`): mínimo 8, máximo 128, solo letras y números, al menos una mayúscula y un número; `PASSWORD_POLICY_HINT` con el texto visible.
+- `src/components/PasswordPolicyNote.tsx`: nota visible con la política, fuera de los `FormField` para no desalinear inputs en grillas de dos columnas (se usa en alta de socio, alta desde admin y los dos cambios de contraseña).
+- `features/auth/schema.ts`: `changePasswordSchema` y `loginChangePasswordSchema` (confirmación y nueva ≠ actual); la contraseña nueva usa la política compartida.
+- `features/users/schema.ts`: `userCreateSchema.password` usa la misma política.
+- `features/auth/components/ChangePasswordDialog.tsx`: diálogo con contraseña actual, nueva y confirmación; error inline + toast.
+- `features/auth/components/LoginChangePasswordDialog.tsx`: mismo cambio desde el login, con email precargado. Hace `POST /auth/login` (verifica identidad) → `PATCH /auth/password` con ese token → `POST /auth/login` con la nueva para dejar la sesión abierta. Si la actual es incorrecta, no llega al PATCH.
+- `features/auth/queries.ts`: `useChangePassword()` (logueado) y `useLoginChangePassword()` (login → PATCH → login).
+- Acceso:
+  - Logueado: botón de llave (`KeyRound`, aria-label “Cambiar contraseña”) en el pie del sidebar (`DashboardLayout` → `UserFooter`), para todos los roles.
+  - Sin sesión: link “¿Olvidaste tu contraseña?” debajo del campo de contraseña en `LoginForm`.
+- Nota: la API no tiene recuperación pública (email/reset token). Sin la contraseña actual no hay forma de cambiarla; el diálogo lo aclara y sugiere contactar al gimnasio.
+- Tests: `auth/api.test.ts` (PATCH y body exactos) y `auth-flow.test.tsx` (éxito/error/validación logueado, y flujo desde login con token temporal y doble login).
 
 ---
 
@@ -81,6 +128,7 @@
 | **API URL** | Configurable via `VITE_API_BASE_URL` (`.env`) o runtime (`localStorage` + `ApiUrlBadge`) |
 | **sport_profile (Fase 9)** | Escritura `require_admin` (403 para cliente). Cliente SOLO lectura vía `/sport-profiles/me`. `POST` manda `user_id` (nunca `created_at`); `PATCH` parcial sin `user_id`. `goal`/`level` en el back son strings libres → en el front son enums con **valores legibles en español** (`Hipertrofia`, `Perder grasa`, `Principiante`…), guardados tal cual. `session_duration` en MINUTOS. 404 con `"User not found"` / `"Sport profile not found"` |
 | **Update sport_profile** | El PATCH se arma por **diff contra el perfil original** (`payload.ts` → `buildSportProfileUpdate`), no con `dirtyFields` de RHF. `trainer_tracking` es checkbox nativo. Sin cambios reales → toast "No hay cambios" y no cierra |
+| **Edición de perfil propio** | `ProfilePage` ("Mi perfil") usa `buildUserUpdate` con los `dirtyFields` de RHF → `PATCH /users/{id}` parcial. Sin cambios → toast "No hay cambios para guardar" y no hay request. `UserFormDialog` reusa la misma función |
 
 ---
 
@@ -92,6 +140,7 @@
 4. **Tests rotos por cambio `active` → `state`** → Actualizado `auth-flow.test.tsx` a `state: 'activo'` y expect `'Activo'`
 5. **`updateMe` (PATCH /users/me) eliminado** → el backend ahora expone `PATCH /users/{id}`; el perfil propio se edita con el id del usuario logueado
 6. **En `/usuarios` "Ver" seguía mostrando un TODO** → no era código: se estaba sirviendo `dist/` viejo. Usar `npm run dev` (HMR) en vez de `preview`/abrir `dist`, y regenerar con `npm run build`
+7. **`ProfilePage.test.tsx` en rojo (2026-10-30)** → el test se había agregado en `14cf297` esperando `PATCH /users/me` con `dirtyFields`, pero `ProfilePage` mandaba el form completo a `/users/{id}`. Se implementó el PATCH parcial con `buildUserUpdate` + toast "No hay cambios para guardar" y se actualizó el test a `/users/{id}`, porque `/users/me` ya no existe en la API
 
 ---
 
@@ -104,23 +153,23 @@
 - [x] `GET /users/{id}` (detalle, `UserDetailDialog`)
 - [x] `GET /users/me` corregido en API
 - [ ] **Verificar permiso de cliente** en `/mi-perfil` con `PATCH /users/{id}`: el spec lo marca admin-only; si el backend no permite edición propia, dará 403 (definir `/users/me` para clientes)
-- [ ] Alta de socio desde admin ("Nuevo socio" en `/usuarios` sigue sin endpoint/handler)
+- [x] Alta de socio desde admin (`UserCreateDialog` + `POST /auth/register` desde `/usuarios`)
 - [ ] Paginación, orden, búsqueda server-side
 
-### Fase 8 — Exercises (Etapa 2 API)
-- [ ] `src/features/exercises/` (CRUD + filtro `?muscular_group=`)
-- [ ] Tipos: `Exercise`, `ExerciseCreate`, `ExerciseUpdate`
-- [ ] Endpoints: `GET/POST /exercises`, `GET/PATCH/DELETE /exercises/{id}`
+### Fase 8 — Exercises (Etapa 2 API) ✅
+- [x] `src/features/exercises/` (CRUD + filtro `?muscular_group=`)
+- [x] Tipos: `Exercise`, `ExerciseCreate`, `ExerciseUpdate`
+- [x] Endpoints: `GET/POST /exercises`, `GET/PATCH/DELETE /exercises/{id}`
 
 ### Fase 9 — Sport Profiles (Etapa 3 API) ✅
 - [x] `src/features/sportProfiles/`
 - [x] "Mi perfil deportivo" (cliente, solo lectura `/me`) + vista admin `/perfiles-deportivos` (CRUD)
 - [x] Endpoints: `GET/POST /sport-profiles`, `GET /sport-profiles/me`, `GET/PATCH/DELETE /sport-profiles/{id}`
 
-### Fase 10 — Routines (Etapa 4 API)
-- [ ] `src/features/routines/`
-- [ ] Editor rutinas (profesor/admin) + visor read-only (cliente)
-- [ ] Endpoints: `GET/POST /routines`, `GET/PATCH/DELETE /routines/{id}`, ejercicios de rutina
+### Fase 10 — Routines (Etapa 4 API) ✅
+- [x] `src/features/routines/`
+- [x] Editor rutinas (profesor/admin) + visor read-only (cliente) con "Historial" de inactivas
+- [x] Endpoints: `GET/POST /routines`, `GET/PATCH/DELETE /routines/{id}`, `POST/GET /routines/{id}/exercises`, `PATCH/DELETE /routines/{id}/exercises/{re_id}`
 
 ### Fase 11 — Payments (Etapa 5 API) ✅
 - [x] `src/features/payments/`
@@ -138,7 +187,7 @@
 - [x] Auth de dos columnas con statement editorial; shell con sidebar seccionado (General / Gestión / Mi cuenta) y topbar mobile.
 - [x] Panel con hero, accesos rápidos por rol, tarjeta de cuenta y "Primeros pasos".
 - [x] Tokens y utilidades en `src/index.css`; primitivos shadcn ajustados (button, card, input, select, table, dialog, badge, alert).
-- [x] Verificado: `npm test` (72), `npm run typecheck`, `npm run lint`, `npm run build`.
+- [x] Verificado: `npm test` (164 al 2026-10-30), `npm run typecheck`, `npm run lint`, `npm run build`.
 
 ---
 
@@ -192,7 +241,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 - Remoto: `origin` → https://github.com/Raiyen00/front-gym.git
 - Rama actual: `Lautaro` (trackea `origin/Lautaro`)
-- Último commit: `cec1579` — *feat: migrar frontend a React 19 + Vite + TS e implementar gestión de socios* (94 archivos, +12644 / -1696)
+- Último commit: `14cf297` — *Se agregaron las features de rutina/ejercicios y cambios visuales en pagos*
+- Commits previos relevantes: `1fc5b88` (pagos + rediseño), `da4e685` (perfiles deportivos), `cec1579` (migración a React 19 + Vite + TS)
 - `.gitignore` excluye `node_modules/`, `dist/`, `coverage/` y `.env`
 
 ---
@@ -242,8 +292,12 @@ logo, settings). Dejarlos configurables en un solo lugar, como ya se hace con
 
 ## Próximos pasos inmediatos
 
-1. **Probar Fase 9 con API real** (`python -m uvicorn main:app --reload`): alta de perfil (elegir socio), edición parcial, borrado y `/mi-perfil-deportivo` con un cliente. Verificar 403 al forzar escritura como cliente y 404 con `user_id` inexistente.
-2. **Probar Fase 11 con API real**: registrar un pago como admin, verificar KPIs, detalle y estado; entrar con un cliente y revisar `/mi-membresia` (vigente, vence hoy y vencida).
-3. **Confirmar permisos de cliente** en `/mi-perfil` (`PATCH /users/{id}` admin-only) → si sigue dando 403, definir `/users/me` para clientes.
-4. **Arreglar CORS en API** → `allow_credentials=False` en `main.py` (si aún no está).
-5. **Comenzar Fase 10 (Routines)**: la API ya expone el CRUD de la cabecera, pero **falta `/exercises` y `/routine-exercises`** para el editor completo. Mientras tanto se puede hacer la cabecera + visor read-only.
+1. **Probar con API real** (`python -m uvicorn main:app --reload`) las features nuevas:
+   - Ejercicios: alta/edición/borrado y filtro por grupo muscular.
+   - Rutinas: alta como profesor, renglones por día, activar/desactivar, "Historial" e impresión; visor como cliente en `/rutinas`.
+   - Pagos: alta, KPIs, serie mensual, vencimientos y `/mi-membresia`.
+   - Cambio de contraseña: desde el sidebar y desde "¿Olvidaste tu contraseña?" en el login.
+2. **Confirmar permisos de cliente** en `/mi-perfil` (`PATCH /users/{id}` figura como admin-only en el spec) → si da 403, definir `/users/me` para clientes.
+3. **Arreglar CORS en API** → `allow_credentials=False` en `main.py` (si aún no está).
+4. **Fase 12 (transversal)**: paginación, orden y búsqueda server-side; toasts de mutación consistentes; optimistic updates donde corresponda.
+5. **Rutinas**: el 409 (ejercicio repetido / posición ocupada) todavía no existe en la API; el formulario ya lo muestra inline. Verificar cuando se implemente.
