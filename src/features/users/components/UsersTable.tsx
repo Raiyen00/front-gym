@@ -1,4 +1,4 @@
-import { CheckCircle2, Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react'
+import { CheckCircle2, Edit, Eye, MoreHorizontal, ShieldCheck, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
 import {
@@ -24,8 +24,11 @@ import type { User } from '@/types/user'
 interface UsersTableProps {
   users: User[]
   canManage: boolean
+  /** Id del usuario logueado: no se ofrece cambiar el rol propio (el back responde 400). */
+  currentUserId?: number
   onView: (user: User) => void
   onEdit: (user: User) => void
+  onAssignRole: (user: User) => void
   onEnable: (user: User) => void
   onDelete: (user: User) => void
 }
@@ -49,8 +52,10 @@ function initials(user: User) {
 export function UsersTable({
   users,
   canManage,
+  currentUserId,
   onView,
   onEdit,
+  onAssignRole,
   onEnable,
   onDelete,
 }: UsersTableProps) {
@@ -144,6 +149,12 @@ export function UsersTable({
                         <Edit className="size-4" />
                         Editar
                       </DropdownMenuItem>
+                      {user.id !== currentUserId && (
+                        <DropdownMenuItem onClick={() => onAssignRole(user)}>
+                          <ShieldCheck className="size-4" />
+                          Asignar rol
+                        </DropdownMenuItem>
+                      )}
                       {user.state !== 'habilitado_entrenar' && (
                         <DropdownMenuItem onClick={() => onEnable(user)}>
                           <CheckCircle2 className="size-4" />

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 
-import { ApiUrlBadge } from '@/components/ApiUrlBadge'
 import { Brand } from '@/components/Brand'
 
 interface AuthLayoutProps {
@@ -25,10 +24,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[0.6875rem] text-text-muted">
             <span>ISFT 194 · Proyecto Final Integrador</span>
-            <span className="inline-flex items-center gap-2">
-              <span>API</span>
-              <ApiUrlBadge />
-            </span>
           </div>
         </div>
       </main>

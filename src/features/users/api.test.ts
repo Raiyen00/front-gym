@@ -1,7 +1,15 @@
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
 
-import { createUser, deleteUser, enableUser, getUser, updateUser } from '@/features/users/api'
+import {
+  createUser,
+  deleteUser,
+  enableUser,
+  getUser,
+  updateMe,
+  updateUser,
+  updateUserRol,
+} from '@/features/users/api'
 import { server } from '@/test/msw/server'
 
 const BASE = 'http://127.0.0.1:8000'
@@ -86,6 +94,48 @@ describe('users api (admin)', () => {
     expect(method).toBe('PATCH')
     expect(payload).toEqual({ name: 'Ana María' })
     expect(updated.name).toBe('Ana María')
+  })
+
+  it('updateMe hace PATCH /users/me con el body parcial', async () => {
+    let method = ''
+    let path = ''
+    let payload: Record<string, unknown> = {}
+    server.use(
+      http.patch(`${BASE}/users/me`, async ({ request }) => {
+        method = request.method
+        path = new URL(request.url).pathname
+        payload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({ ...USER, phone: '1199998888' })
+      }),
+    )
+
+    const updated = await updateMe({ phone: '1199998888' })
+
+    expect(method).toBe('PATCH')
+    expect(path).toBe('/users/me')
+    expect(payload).toEqual({ phone: '1199998888' })
+    expect(updated.phone).toBe('1199998888')
+  })
+
+  it('updateUserRol hace PATCH /users/{id}/rol con el rol elegido', async () => {
+    let method = ''
+    let path = ''
+    let payload: Record<string, unknown> = {}
+    server.use(
+      http.patch(`${BASE}/users/7/rol`, async ({ request }) => {
+        method = request.method
+        path = new URL(request.url).pathname
+        payload = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({ ...USER, rol: 'profesor' })
+      }),
+    )
+
+    const updated = await updateUserRol(7, 'profesor')
+
+    expect(method).toBe('PATCH')
+    expect(path).toBe('/users/7/rol')
+    expect(payload).toEqual({ rol: 'profesor' })
+    expect(updated.rol).toBe('profesor')
   })
 
   it('enableUser hace PATCH /users/{id}/habilitar sin body', async () => {

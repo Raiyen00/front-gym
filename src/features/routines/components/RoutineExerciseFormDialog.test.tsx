@@ -48,9 +48,7 @@ function renderDialog(onSubmit = vi.fn().mockResolvedValue(undefined)) {
     defaultOptions: { queries: { retry: false } },
   })
   server.use(
-    http.get(`${BASE}/exercises`, () =>
-      HttpResponse.json([EXERCISE_ROW.exercise]),
-    ),
+    http.get(`${BASE}/exercises`, () => HttpResponse.json(EXERCISES)),
   )
 
   return render(
@@ -123,6 +121,27 @@ describe('RoutineExerciseFormDialog', () => {
     expect(
       await screen.findByText('Ya existe un ejercicio en ese día y posición.'),
     ).toBeInTheDocument()
+  })
+
+  it('permite cambiar el ejercicio en la edición y envía exercise_id', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    renderDialog(onSubmit)
+
+    const groupSelect = screen.getByRole('combobox', { name: 'Grupo muscular' })
+    await waitFor(() => expect(groupSelect).toBeEnabled())
+    await user.click(groupSelect)
+    await user.click(await screen.findByRole('option', { name: 'Espalda' }))
+
+    await user.click(screen.getByRole('combobox', { name: 'Ejercicio' }))
+    await user.click(await screen.findByRole('option', { name: 'Remo con barra' }))
+
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({ exercise_id: 2 }),
+    )
+    expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 
   it('filtra los ejercicios por grupo muscular y resetea al cambiarlo', async () => {

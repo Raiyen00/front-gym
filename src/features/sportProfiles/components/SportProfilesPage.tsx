@@ -16,6 +16,7 @@ import {
 } from '@/features/sportProfiles/queries'
 import { useUsers } from '@/features/users/queries'
 import { getErrorMessage } from '@/features/auth/utils'
+import { ApiError } from '@/lib/api/client'
 import type {
   SportProfile,
   SportProfileCreate,
@@ -68,7 +69,11 @@ export function SportProfilesPage() {
       setFormOpen(false)
       setEditingProfile(null)
     } catch (err) {
-      toast.error(getErrorMessage(err))
+      if (!editingProfile && err instanceof ApiError && err.status === 409) {
+        toast.error('El socio tiene que estar habilitado para entrenar')
+      } else {
+        toast.error(getErrorMessage(err))
+      }
     }
   }
 

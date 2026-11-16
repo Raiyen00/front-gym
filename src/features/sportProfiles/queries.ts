@@ -7,10 +7,11 @@ import type {
   SportProfileUpdate,
 } from '@/types/sportProfile'
 
-export function useSportProfiles() {
+export function useSportProfiles(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.sportProfiles.all,
     queryFn: sportProfilesApi.getSportProfiles,
+    enabled: options.enabled ?? true,
   })
 }
 

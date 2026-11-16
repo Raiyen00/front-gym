@@ -3,7 +3,6 @@ import { KeyRound, LogOut, Menu, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { ApiUrlBadge } from '@/components/ApiUrlBadge'
 import { Brand } from '@/components/Brand'
 import { Button } from '@/components/ui/button'
 import {
@@ -216,10 +215,6 @@ export function DashboardLayout() {
         </div>
         <div className="shrink-0 border-t border-border px-4 py-4">
           <UserFooter />
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/70 pt-3">
-            <span className="text-[0.6875rem] text-text-muted">v0.1</span>
-            <ApiUrlBadge />
-          </div>
         </div>
       </aside>
 

@@ -6,8 +6,10 @@ import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
 
 import { Toaster } from '@/components/ui/sonner'
+import { AuthContext } from '@/features/auth/context'
 import { StaffRoutinesView } from '@/features/routines/components/StaffRoutinesView'
 import { server } from '@/test/msw/server'
+import type { User } from '@/types/user'
 
 const BASE = 'http://127.0.0.1:8000'
 
@@ -30,6 +32,27 @@ const CLIENT = {
   register_date: '2026-01-01T00:00:00Z',
 }
 
+const ADMIN: User = {
+  id: 1,
+  email: 'admin@test.com',
+  name: 'Admin',
+  lastname: 'Test',
+  dni: '11111111',
+  phone: null,
+  rol: 'admin',
+  state: 'activo',
+  register_date: '2026-01-01T00:00:00Z',
+}
+
+const authValue = {
+  user: ADMIN,
+  status: 'authenticated' as const,
+  login: async () => ADMIN,
+  register: async () => ADMIN,
+  logout: () => {},
+  updateCurrentUser: () => {},
+}
+
 function renderView() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -37,10 +60,12 @@ function renderView() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <StaffRoutinesView />
-      </MemoryRouter>
-      <Toaster />
+      <AuthContext.Provider value={authValue}>
+        <MemoryRouter>
+          <StaffRoutinesView />
+        </MemoryRouter>
+        <Toaster />
+      </AuthContext.Provider>
     </QueryClientProvider>,
   )
 }

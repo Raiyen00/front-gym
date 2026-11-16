@@ -19,13 +19,13 @@ import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { userUpdateSchema, type UserUpdateFormValues } from '@/features/users/schema'
 import { buildUserUpdate } from '@/features/users/payload'
-import { useUpdateUser } from '@/features/users/queries'
+import { useUpdateMe } from '@/features/users/queries'
 import { getErrorMessage } from '@/features/auth/utils'
 import { ROL_LABELS, USER_STATE_LABELS } from '@/types/enums'
 
 export function ProfilePage() {
   const { user, updateCurrentUser } = useAuth()
-  const updateUser = useUpdateUser(user?.id ?? 0)
+  const updateMe = useUpdateMe()
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const form = useForm<UserUpdateFormValues>({
@@ -48,7 +48,7 @@ export function ProfilePage() {
     }
 
     try {
-      const updated = await updateUser.mutateAsync(payload)
+      const updated = await updateMe.mutateAsync(payload)
       form.reset({
         name: updated.name,
         lastname: updated.lastname,
@@ -181,9 +181,9 @@ export function ProfilePage() {
               <div className="mt-6 flex justify-end border-t border-border pt-5">
                 <Button
                   type="submit"
-                  disabled={form.formState.isSubmitting || updateUser.isPending}
+                  disabled={form.formState.isSubmitting || updateMe.isPending}
                 >
-                  {form.formState.isSubmitting || updateUser.isPending ? (
+                  {form.formState.isSubmitting || updateMe.isPending ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
                       Guardando...

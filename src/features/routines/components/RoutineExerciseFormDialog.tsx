@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -59,7 +58,7 @@ import type {
 
 interface RoutineExerciseFormDialogProps {
   open: boolean
-  /** `null` => alta. En edición no se puede cambiar el ejercicio. */
+  /** `null` => alta. En edición se puede cambiar el ejercicio. */
   exerciseRow: RoutineExercise | null
   isPending: boolean
   onSubmit: (
@@ -88,7 +87,7 @@ export function RoutineExerciseFormDialog({
   const { data: exercises, isLoading: exercisesLoading } = useExercises()
   const [conflict, setConflict] = useState<string | null>(null)
   // El grupo muscular es solo navegación: filtra el segundo select y no
-  // viaja en el body. En edición queda fijo al grupo del ejercicio actual.
+  // viaja en el body. En edición arranca en el grupo del ejercicio actual.
   const [muscularGroup, setMuscularGroup] = useState<GrupoMuscular | ''>(
     () => exerciseRow?.exercise.muscular_group ?? '',
   )
@@ -137,8 +136,8 @@ export function RoutineExerciseFormDialog({
       await onSubmit(buildRoutineExerciseCreate(values))
     } catch (error) {
       const message = getErrorMessage(error)
-      // El 409 todavía no está implementado en la API, pero cuando llegue
-      // (ejercicio repetido en el día o posición ocupada) se muestra inline.
+      // 409 de la API: ejercicio repetido en el día o posición ocupada.
+      // Se muestra inline para que el usuario corrija sin cerrar el diálogo.
       if (error instanceof ApiError && error.status === 409) {
         setConflict(message)
         return
@@ -156,7 +155,7 @@ export function RoutineExerciseFormDialog({
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Solo se envían los campos modificados.'
+              ? 'Solo se envían los campos modificados; también podés cambiar el ejercicio.'
               : 'El ejercicio se agrega a un día del plan, con su orden dentro del día.'}
           </DialogDescription>
         </DialogHeader>
@@ -173,100 +172,83 @@ export function RoutineExerciseFormDialog({
             noValidate
             className="space-y-4"
           >
-            {isEdit && exerciseRow ? (
-              <div className="flex items-center justify-between gap-3 rounded-md border border-input p-3">
-                <div>
-                  <p className="text-[0.875rem] font-medium text-foreground">
-                    {exerciseRow.exercise.name}
-                  </p>
-                  <p className="text-[0.8125rem] text-text-muted">
-                    Se puede cambiar el ejercicio en la edición.
-                  </p>
-                </div>
-                <Badge variant="outline">
-                  {GRUPO_MUSCULAR_LABELS[exerciseRow.exercise.muscular_group] ||
-                    exerciseRow.exercise.muscular_group}
-                </Badge>
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="routine-exercise-group">Grupo muscular</Label>
-                  <Select
-                    value={muscularGroup}
-                    onValueChange={handleGroupChange}
-                    disabled={exercisesLoading || availableGroups.length === 0}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="routine-exercise-group">Grupo muscular</Label>
+                <Select
+                  value={muscularGroup}
+                  onValueChange={handleGroupChange}
+                  disabled={exercisesLoading || availableGroups.length === 0}
+                >
+                  <SelectTrigger
+                    id="routine-exercise-group"
+                    className="w-full"
                   >
-                    <SelectTrigger
-                      id="routine-exercise-group"
-                      className="w-full"
-                    >
-                      <SelectValue
-                        placeholder={
-                          exercisesLoading
-                            ? 'Cargando ejercicios...'
-                            : availableGroups.length === 0
-                              ? 'Sin ejercicios cargados'
-                              : 'Elegí un grupo'
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableGroups.map((group) => (
-                        <SelectItem key={group} value={group}>
-                          {GRUPO_MUSCULAR_LABELS[group]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {!exercisesLoading && availableGroups.length === 0 && (
-                    <p className="text-[0.8125rem] text-text-muted">
-                      Cargá ejercicios desde la sección Ejercicios.
-                    </p>
-                  )}
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="exercise_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ejercicio</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={!muscularGroup}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder={
-                                !muscularGroup
-                                  ? 'Elegí primero un grupo'
-                                  : groupExercises.length === 0
-                                    ? 'No hay ejercicios en este grupo'
-                                    : 'Elegí un ejercicio'
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {groupExercises.map((exercise) => (
-                            <SelectItem
-                              key={exercise.id}
-                              value={String(exercise.id)}
-                            >
-                              {exercise.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <SelectValue
+                      placeholder={
+                        exercisesLoading
+                          ? 'Cargando ejercicios...'
+                          : availableGroups.length === 0
+                            ? 'Sin ejercicios cargados'
+                            : 'Elegí un grupo'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableGroups.map((group) => (
+                      <SelectItem key={group} value={group}>
+                        {GRUPO_MUSCULAR_LABELS[group]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!exercisesLoading && availableGroups.length === 0 && (
+                  <p className="text-[0.8125rem] text-text-muted">
+                    Cargá ejercicios desde la sección Ejercicios.
+                  </p>
+                )}
               </div>
-            )}
+
+              <FormField
+                control={form.control}
+                name="exercise_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ejercicio</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={!muscularGroup}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              !muscularGroup
+                                ? 'Elegí primero un grupo'
+                                : groupExercises.length === 0
+                                  ? 'No hay ejercicios en este grupo'
+                                  : 'Elegí un ejercicio'
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {groupExercises.map((exercise) => (
+                          <SelectItem
+                            key={exercise.id}
+                            value={String(exercise.id)}
+                          >
+                            {exercise.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField

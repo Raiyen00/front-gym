@@ -32,6 +32,7 @@ import { paymentFormSchema, type PaymentFormValues } from '@/features/payments/s
 import {
   buildPaymentCreate,
   defaultExpirationDate,
+  tomorrowInputDate,
 } from '@/features/payments/payload'
 import { METODOS_PAGO, METODO_PAGO_LABELS } from '@/types/enums'
 import type { PaymentCreate } from '@/types/payment'
@@ -161,7 +162,7 @@ export function PaymentFormDialog({
                 <FormItem>
                   <FormLabel>Vencimiento</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" min={tomorrowInputDate()} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

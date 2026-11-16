@@ -94,9 +94,9 @@ function errorMessageFor(status: number, detail?: ApiErrorPayload['detail']): st
     case 409:
       return 'El recurso ya existe o está duplicado.'
     case 422:
-      return 'Datos inválidos enviados al servidor.'
+      return 'Revisá los datos ingresados.'
     default:
-      return `Error en el servidor (HTTP ${status}).`
+      return 'No pudimos completar la operación. Intentá de nuevo.'
   }
 }
 
@@ -136,8 +136,8 @@ export async function request<T>(
     const aborted = error instanceof DOMException && error.name === 'AbortError'
     throw new ApiError(
       aborted
-        ? `La petición a ${baseUrl} tardó demasiado (timeout de ${TIMEOUT_MS / 1000}s).`
-        : `No se pudo conectar con la API en ${baseUrl}. Asegurate de que el servidor FastAPI esté levantado y tenga CORS habilitado.`,
+        ? 'El servidor está tardando en responder. Intentá de nuevo en unos minutos.'
+        : 'No pudimos conectarnos con el servidor. Revisá tu conexión e intentá de nuevo.',
       { isNetworkError: true },
     )
   } finally {

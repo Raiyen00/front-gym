@@ -3,21 +3,11 @@
  * Portado de js/config.js.
  */
 
-const STORAGE_API_URL_KEY = 'gymsass_api_url'
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8000'
 
-/** URL base efectiva: override en localStorage > variable de entorno > default. */
+/** URL base efectiva: variable de entorno del build o default local. */
 export function getApiBaseUrl(): string {
-  return (
-    localStorage.getItem(STORAGE_API_URL_KEY) ||
-    import.meta.env.VITE_API_BASE_URL ||
-    DEFAULT_API_BASE_URL
-  )
-}
-
-/** Guarda el override de la URL base y fuerza recarga para reconfigurar el cliente. */
-export function setApiBaseUrl(url: string): void {
-  localStorage.setItem(STORAGE_API_URL_KEY, url.trim())
+  return import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL
 }
 
 /** Claves de localStorage (se preservan las del proyecto original). */
