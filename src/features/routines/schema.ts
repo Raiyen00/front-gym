@@ -18,7 +18,7 @@ const integerString = (message: string, minimum: number) =>
  * desde el listado o el detalle con `PATCH /routines/{id}`.
  */
 export const routineFormSchema = z.object({
-  user_id: z.string().trim().min(1, 'Elegí un socio'),
+  user_id: z.string().trim().min(1, 'Elegí un socio o profesor'),
   date_generated: z
     .string()
     .trim()

@@ -76,8 +76,8 @@ export function RoutineFormDialog({
 
   /**
    * La API rechaza con 409 asignar una rutina a un socio sin perfil deportivo,
-   * así que solo ofrecemos socios habilitados para entrenar (y, si el usuario
-   * es admin, que además ya tengan su perfil deportivo).
+   * así que solo ofrecemos socios y profesores habilitados para entrenar (y, si
+   * el usuario es admin, que además ya tengan su perfil deportivo).
    */
   const eligibleUsers = useMemo(
     () =>
@@ -148,7 +148,7 @@ export function RoutineFormDialog({
               name="user_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Socio</FormLabel>
+                  <FormLabel>Socio o profesor</FormLabel>
                   <Select
                     value={field.value}
                     onValueChange={(value) => {
@@ -164,8 +164,8 @@ export function RoutineFormDialog({
                             eligibilityLoading
                               ? 'Cargando socios...'
                               : noEligibleUsers
-                                ? 'Sin socios disponibles'
-                                : 'Elegí un socio'
+                                ? 'Sin socios ni profesores disponibles'
+                                : 'Elegí un socio o profesor'
                           }
                         />
                       </SelectTrigger>
@@ -180,9 +180,9 @@ export function RoutineFormDialog({
                   </Select>
                   {noEligibleUsers && (
                     <p className="text-[0.8125rem] text-warning">
-                      No hay socios habilitados para entrenar con perfil deportivo.
-                      Un socio necesita estar habilitado para entrenar y tener su
-                      perfil deportivo creado.
+                      No hay socios ni profesores habilitados para entrenar con
+                      perfil deportivo. Hace falta estar habilitado para entrenar y
+                      tener el perfil deportivo creado.
                     </p>
                   )}
                   <FormMessage />

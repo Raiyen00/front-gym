@@ -127,7 +127,7 @@ export function SportProfileFormDialog({
           <DialogDescription>
             {isEdit
               ? 'Solo se envían los campos modificados (sin user_id).'
-              : 'El perfil se asocia a un socio existente.'}
+              : 'El perfil se asocia a un socio o profesor existente.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -135,7 +135,7 @@ export function SportProfileFormDialog({
           <form onSubmit={form.handleSubmit(handleSubmit)} noValidate className="space-y-4">
             {!isEdit && (
               <FormItem>
-                <FormLabel>Socio</FormLabel>
+                <FormLabel>Socio o profesor</FormLabel>
                 <Select
                   value={userId}
                   onValueChange={(value) => {
@@ -146,7 +146,7 @@ export function SportProfileFormDialog({
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Elegí un socio" />
+                      <SelectValue placeholder="Elegí un socio o profesor" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -159,8 +159,9 @@ export function SportProfileFormDialog({
                 </Select>
                 {users !== undefined && eligibleUsers.length === 0 && (
                   <p className="text-[0.8125rem] text-warning">
-                    No hay socios habilitados para entrenar. Habilitá a un socio desde
-                    “Socios” antes de crear su perfil deportivo.
+                    No hay socios ni profesores habilitados para entrenar. Habilitá
+                    a un socio o profesor desde “Socios” antes de crear su perfil
+                    deportivo.
                   </p>
                 )}
                 {userError && <p className="text-sm text-destructive">{userError}</p>}

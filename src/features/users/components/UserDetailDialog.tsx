@@ -100,7 +100,7 @@ export function UserDetailDialog({
           {canManage && user && (
             <Button type="button" variant="destructive" onClick={() => onDelete(user)}>
               <Trash2 className="size-3.5" />
-              Eliminar
+              Dar de baja
             </Button>
           )}
         </DialogFooter>

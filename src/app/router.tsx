@@ -68,7 +68,7 @@ export function AppRouter() {
           <Route
             path="/mi-perfil"
             element={
-              <RequireRole roles={['cliente']}>
+              <RequireRole roles={['cliente', 'profesor']}>
                 <ProfilePage />
               </RequireRole>
             }
@@ -76,7 +76,7 @@ export function AppRouter() {
           <Route
             path="/mi-perfil-deportivo"
             element={
-              <RequireRole roles={['cliente']}>
+              <RequireRole roles={['cliente', 'profesor']}>
                 <MySportProfilePage />
               </RequireRole>
             }
