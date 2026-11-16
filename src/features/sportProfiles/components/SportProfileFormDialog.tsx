@@ -82,6 +82,8 @@ export function SportProfileFormDialog({
 
   const goalOptions = optionsWithLegacy(SPORT_GOALS, profile?.goal)
   const levelOptions = optionsWithLegacy(SPORT_LEVELS, profile?.level)
+  const eligibleUsers =
+    users?.filter((u) => u.state === 'habilitado_entrenar') ?? []
 
   const form = useForm<SportProfileFormValues>({
     resolver: zodResolver(sportProfileFormSchema),
@@ -140,6 +142,7 @@ export function SportProfileFormDialog({
                     setUserId(value)
                     setUserError(null)
                   }}
+                  disabled={users !== undefined && eligibleUsers.length === 0}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -147,13 +150,19 @@ export function SportProfileFormDialog({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {users?.map((u) => (
+                    {eligibleUsers.map((u) => (
                       <SelectItem key={u.id} value={String(u.id)}>
                         {u.name} {u.lastname} ({u.email})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {users !== undefined && eligibleUsers.length === 0 && (
+                  <p className="text-[0.8125rem] text-warning">
+                    No hay socios habilitados para entrenar. Habilitá a un socio desde
+                    “Socios” antes de crear su perfil deportivo.
+                  </p>
+                )}
                 {userError && <p className="text-sm text-destructive">{userError}</p>}
               </FormItem>
             )}

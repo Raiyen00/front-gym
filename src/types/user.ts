@@ -41,3 +41,8 @@ export interface UserUpdate {
   dni?: string
   phone?: string
 }
+
+/** Espejo de `UserRolUpdate` (PATCH /users/{id}/rol). */
+export interface UserRolUpdate {
+  rol: Rol
+}

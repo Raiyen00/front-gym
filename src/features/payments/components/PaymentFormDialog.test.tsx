@@ -5,6 +5,7 @@ import { HttpResponse, http } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
 
 import { PaymentFormDialog } from '@/features/payments/components/PaymentFormDialog'
+import { tomorrowInputDate } from '@/features/payments/payload'
 import { Toaster } from '@/components/ui/sonner'
 import { server } from '@/test/msw/server'
 
@@ -49,5 +50,14 @@ describe('PaymentFormDialog', () => {
 
     expect(screen.getByLabelText('Monto')).toBeInTheDocument()
     expect(screen.getByLabelText('Vencimiento')).toBeInTheDocument()
+  })
+
+  it('solo permite elegir un vencimiento desde mañana', () => {
+    renderDialog()
+
+    expect(screen.getByLabelText('Vencimiento')).toHaveAttribute(
+      'min',
+      tomorrowInputDate(),
+    )
   })
 })

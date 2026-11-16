@@ -9,6 +9,7 @@ import { SportProfileFormDialog } from '@/features/sportProfiles/components/Spor
 import { Toaster } from '@/components/ui/sonner'
 import { server } from '@/test/msw/server'
 import type { SportProfile } from '@/types/sportProfile'
+import type { User } from '@/types/user'
 
 const BASE = 'http://127.0.0.1:8000'
 
@@ -25,13 +26,29 @@ const ORIGINAL: SportProfile = {
   created_at: '2026-02-01T10:00:00Z',
 }
 
+function makeUser(overrides: Partial<User>): User {
+  return {
+    id: 1,
+    email: 'socio@test.com',
+    name: 'Socio',
+    lastname: 'Test',
+    dni: '30000000',
+    phone: null,
+    rol: 'cliente',
+    state: 'habilitado_entrenar',
+    register_date: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
 function renderDialog(
   props: Partial<ComponentProps<typeof SportProfileFormDialog>> = {},
+  users: User[] = [],
 ) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  server.use(http.get(`${BASE}/users`, () => HttpResponse.json([])))
+  server.use(http.get(`${BASE}/users`, () => HttpResponse.json(users)))
 
   return render(
     <QueryClientProvider client={queryClient}>
@@ -47,6 +64,46 @@ function renderDialog(
     </QueryClientProvider>,
   )
 }
+
+describe('SportProfileFormDialog (alta)', () => {
+  it('solo ofrece socios habilitados para entrenar', async () => {
+    const user = userEvent.setup()
+    renderDialog(
+      { profile: null },
+      [
+        makeUser({ id: 7, name: 'Ana', lastname: 'Habilitada' }),
+        makeUser({
+          id: 8,
+          name: 'Beto',
+          lastname: 'Pendiente',
+          state: 'pendiente_habilitacion',
+        }),
+      ],
+    )
+
+    const select = await screen.findByRole('combobox', { name: 'Socio' })
+    await waitFor(() => expect(select).toBeEnabled())
+    await user.click(select)
+
+    expect(
+      await screen.findByRole('option', { name: /Ana Habilitada/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('option', { name: /Beto Pendiente/ }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('avisa cuando no hay socios habilitados', async () => {
+    renderDialog({ profile: null }, [
+      makeUser({ id: 8, state: 'pendiente_habilitacion' }),
+    ])
+
+    expect(
+      await screen.findByText(/No hay socios habilitados para entrenar/),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Socio' })).toBeDisabled()
+  })
+})
 
 describe('SportProfileFormDialog (edición)', () => {
   it('envía PATCH solo con trainer_tracking al cambiar el seguimiento', async () => {

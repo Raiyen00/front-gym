@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { METODOS_PAGO } from '@/types/enums'
+import { todayInputDate } from '@/features/payments/payload'
 
 /**
  * Formulario de alta de pago. El monto se maneja como string (acepta coma o
@@ -22,7 +23,11 @@ export const paymentFormSchema = z.object({
     .string()
     .trim()
     .min(1, 'Seleccioná la fecha de vencimiento')
-    .refine((value) => !Number.isNaN(Date.parse(value)), 'Fecha inválida'),
+    .refine((value) => !Number.isNaN(Date.parse(value)), 'Fecha inválida')
+    .refine(
+      (value) => value > todayInputDate(),
+      'Elegí una fecha posterior a hoy',
+    ),
 })
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>

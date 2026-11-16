@@ -16,8 +16,21 @@ const CLIENT = {
   dni: '38999888',
   phone: '1145678901',
   rol: 'cliente',
-  state: 'activo',
+  state: 'habilitado_entrenar',
   register_date: '2026-01-01T00:00:00Z',
+}
+
+const SPORT_PROFILE = {
+  id: 3,
+  user_id: 7,
+  goal: 'fuerza',
+  level: 'principiante',
+  days_per_week: 3,
+  session_duration: 60,
+  age: 30,
+  injuries: null,
+  trainer_tracking: false,
+  created_at: '2026-01-02T00:00:00Z',
 }
 
 const EXERCISE = {
@@ -177,6 +190,9 @@ describe('flujo de rutinas', () => {
     server.use(
       http.get(`${BASE}/routines`, () => HttpResponse.json([])),
       http.get(`${BASE}/users`, () => HttpResponse.json([CLIENT])),
+      http.get(`${BASE}/sport-profiles`, () =>
+        HttpResponse.json([SPORT_PROFILE]),
+      ),
       http.post(`${BASE}/routines`, async ({ request }) => {
         createdBody = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
@@ -213,6 +229,70 @@ describe('flujo de rutinas', () => {
 
     expect(
       await screen.findByRole('heading', { name: 'Rutina #9' }),
+    ).toBeInTheDocument()
+  })
+
+  it('solo ofrece socios habilitados con perfil deportivo y muestra el 409 inline', async () => {
+    const user = userEvent.setup()
+    mockSession('admin')
+    const sinPerfil = {
+      ...CLIENT,
+      id: 8,
+      email: 'beto@test.com',
+      name: 'Beto',
+      lastname: 'Pérez',
+    }
+    const noHabilitado = {
+      ...CLIENT,
+      id: 9,
+      email: 'carla@test.com',
+      name: 'Carla',
+      lastname: 'Ruiz',
+      state: 'activo',
+    }
+    server.use(
+      http.get(`${BASE}/routines`, () => HttpResponse.json([])),
+      http.get(`${BASE}/users`, () =>
+        HttpResponse.json([CLIENT, sinPerfil, noHabilitado]),
+      ),
+      http.get(`${BASE}/sport-profiles`, () =>
+        HttpResponse.json([SPORT_PROFILE]),
+      ),
+      http.post(`${BASE}/routines`, () =>
+        HttpResponse.json(
+          { detail: 'El usuario no tiene un perfil deportivo' },
+          { status: 409 },
+        ),
+      ),
+    )
+    window.history.pushState({}, '', '/rutinas')
+
+    render(<App />)
+
+    await screen.findByRole('heading', { name: 'Rutinas' })
+    await user.click(screen.getByRole('button', { name: 'Nueva rutina' }))
+    await user.click(screen.getByRole('combobox', { name: 'Socio' }))
+
+    expect(
+      await screen.findByRole('option', { name: /Ana Gómez/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('option', { name: /Beto Pérez/ }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('option', { name: /Carla Ruiz/ }),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('option', { name: /Ana Gómez/ }))
+    await user.click(screen.getByRole('button', { name: 'Crear rutina' }))
+
+    expect(
+      await screen.findByText(
+        'El socio no tiene un perfil deportivo. Creá su perfil deportivo antes de asignarle una rutina.',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Nueva rutina' }),
     ).toBeInTheDocument()
   })
 

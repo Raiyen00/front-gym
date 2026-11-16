@@ -109,7 +109,7 @@ describe('request', () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(
       new DOMException('aborted', 'AbortError'),
     )
-    await expect(request('/slow')).rejects.toThrow(/tardó demasiado/)
+    await expect(request('/slow')).rejects.toThrow(/tardando en responder/)
     vi.restoreAllMocks()
   })
 })

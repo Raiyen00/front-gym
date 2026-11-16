@@ -1,7 +1,10 @@
+import { useMemo, useState } from 'react'
 import { Loader2, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,13 +30,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useAuth } from '@/features/auth/useAuth'
+import { getErrorMessage } from '@/features/auth/utils'
 import { useUsers } from '@/features/users/queries'
+import { useSportProfiles } from '@/features/sportProfiles/queries'
 import {
   routineFormSchema,
   type RoutineFormValues,
 } from '@/features/routines/schema'
 import { buildRoutineCreate } from '@/features/routines/payload'
 import { todayInputDate } from '@/features/routines/dates'
+import { ApiError } from '@/lib/api/client'
 import type { RoutineCreate } from '@/types/routine'
 
 interface RoutineFormDialogProps {
@@ -49,7 +56,42 @@ export function RoutineFormDialog({
   onSubmit,
   onOpenChange,
 }: RoutineFormDialogProps) {
-  const { data: users } = useUsers()
+  const { user } = useAuth()
+  const { data: users, isLoading: usersLoading } = useUsers()
+  // `GET /sport-profiles` es solo para admin: un profesor no puede listar los
+  // perfiles y se apoya en el 409 de la API.
+  const isAdmin = user?.rol === 'admin'
+  const { data: profiles, isLoading: profilesLoading } = useSportProfiles({
+    enabled: open && isAdmin,
+  })
+  const [conflict, setConflict] = useState<string | null>(null)
+
+  // Si la consulta de perfiles falla (por ejemplo, por red) seguimos
+  // ofreciendo los socios habilitados y el 409 de la API cubre el resto.
+  const filterByProfile = isAdmin && profiles !== undefined
+  const profileUserIds = useMemo(
+    () => new Set((profiles ?? []).map((profile) => profile.user_id)),
+    [profiles],
+  )
+
+  /**
+   * La API rechaza con 409 asignar una rutina a un socio sin perfil deportivo,
+   * así que solo ofrecemos socios habilitados para entrenar (y, si el usuario
+   * es admin, que además ya tengan su perfil deportivo).
+   */
+  const eligibleUsers = useMemo(
+    () =>
+      (users ?? []).filter(
+        (candidate) =>
+          candidate.state === 'habilitado_entrenar' &&
+          (!filterByProfile || profileUserIds.has(candidate.id)),
+      ),
+    [users, filterByProfile, profileUserIds],
+  )
+
+  const eligibilityLoading = usersLoading || (isAdmin && profilesLoading)
+  const noEligibleUsers =
+    !eligibilityLoading && users !== undefined && eligibleUsers.length === 0
 
   const form = useForm<RoutineFormValues>({
     resolver: zodResolver(routineFormSchema),
@@ -60,7 +102,22 @@ export function RoutineFormDialog({
   })
 
   async function handleSubmit(values: RoutineFormValues) {
-    await onSubmit(buildRoutineCreate(values))
+    setConflict(null)
+
+    try {
+      await onSubmit(buildRoutineCreate(values))
+    } catch (error) {
+      const message = getErrorMessage(error)
+      // 409 de la API: el socio no tiene perfil deportivo. Se muestra inline
+      // para poder elegir otro socio sin cerrar el diálogo.
+      if (error instanceof ApiError && error.status === 409) {
+        setConflict(
+          'El socio no tiene un perfil deportivo. Creá su perfil deportivo antes de asignarle una rutina.',
+        )
+        return
+      }
+      toast.error(message)
+    }
   }
 
   return (
@@ -74,6 +131,12 @@ export function RoutineFormDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {conflict && (
+          <Alert variant="warning">
+            <AlertDescription>{conflict}</AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -86,20 +149,42 @@ export function RoutineFormDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Socio</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      setConflict(null)
+                      field.onChange(value)
+                    }}
+                    disabled={eligibilityLoading || noEligibleUsers}
+                  >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Elegí un socio" />
+                        <SelectValue
+                          placeholder={
+                            eligibilityLoading
+                              ? 'Cargando socios...'
+                              : noEligibleUsers
+                                ? 'Sin socios disponibles'
+                                : 'Elegí un socio'
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users?.map((user) => (
-                        <SelectItem key={user.id} value={String(user.id)}>
-                          {user.name} {user.lastname} ({user.email})
+                      {eligibleUsers.map((candidate) => (
+                        <SelectItem key={candidate.id} value={String(candidate.id)}>
+                          {candidate.name} {candidate.lastname} ({candidate.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {noEligibleUsers && (
+                    <p className="text-[0.8125rem] text-warning">
+                      No hay socios habilitados para entrenar con perfil deportivo.
+                      Un socio necesita estar habilitado para entrenar y tener su
+                      perfil deportivo creado.
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,7 +213,10 @@ export function RoutineFormDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending || eligibilityLoading || noEligibleUsers}
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="size-3.5 animate-spin" />

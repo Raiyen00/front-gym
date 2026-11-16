@@ -31,7 +31,7 @@ npm run dev
 | ------------------- | ------------------------ | ----------------------- |
 | `VITE_API_BASE_URL` | URL base de la API       | `http://127.0.0.1:8000` |
 
-La URL también es editable en runtime desde el badge `ApiUrlBadge` (`setApiBaseUrl`).
+La URL se define al compilar con `VITE_API_BASE_URL`; no se muestra ni se edita desde la interfaz.
 
 ### Scripts
 
@@ -57,12 +57,16 @@ src/
 │   └── router.tsx           # Definición de rutas
 ├── components/
 │   ├── ui/                  # Primitivos shadcn/ui
-│   ├── Brand.tsx
-│   └── ApiUrlBadge.tsx
+│   └── Brand.tsx
 ├── config/
 │   └── nav.ts               # Items de navegación con allowedRoles
 ├── features/
-│   └── auth/                # api, schema, context, componentes y tests
+│   ├── auth/                # login, registro, sesión
+│   ├── users/               # socios, perfil propio y roles
+│   ├── exercises/           # catálogo de ejercicios
+│   ├── routines/            # rutinas y renglones por día
+│   ├── sportProfiles/       # perfiles deportivos
+│   └── payments/            # pagos y membresía
 ├── lib/
 │   ├── api/                 # client (request<T>, ApiError), config, queryKeys
 │   ├── formatters.ts        # Moneda / fecha / fecha-hora
@@ -79,16 +83,21 @@ src/
 
 ## 🔌 Integración con la API
 
-Endpoints documentados en el `plan.md` de `GymApi`:
+El contrato completo vive en el Swagger de `GymApi` (`/docs`). Endpoints que consume este front:
 
-- `POST /auth/register` — JSON (`email, password, name, lastname, dni, phone`)
-- `POST /auth/login` — `application/x-www-form-urlencoded` (`username`, `password`)
-  → devuelve **solo** el token; el usuario se hidrata con `GET /users/me`
-- `GET /users/me` — perfil de la sesión activa
-- `GET /` — health check
+- **Auth:** `POST /auth/register` (JSON) · `POST /auth/login` (`application/x-www-form-urlencoded`, devuelve **solo** el token) · `PATCH /auth/password`
+- **Usuarios:** `GET /users` · `GET /users/me` · `GET /users/{id}` · `PATCH /users/me` (perfil propio) · `PATCH /users/{id}` (admin) · `PATCH /users/{id}/rol` (admin) · `PATCH /users/{id}/habilitar` (admin) · `DELETE /users/{id}` (admin)
+- **Ejercicios:** `GET/POST /exercises` · `GET/PATCH/DELETE /exercises/{id}` · filtro `?muscular_group=`
+- **Perfiles deportivos:** `GET/POST /sport-profiles` · `GET /sport-profiles/me` · `GET/PATCH/DELETE /sport-profiles/{id}`
+- **Rutinas:** `GET/POST /routines` · `GET /routines/me` · `GET/PATCH/DELETE /routines/{id}` · `GET/POST /routines/{id}/exercises` · `PATCH/DELETE /routines/{id}/exercises/{re_id}`
+- **Pagos:** `GET/POST /payment` (**singular**) · `GET /payment/me` · `GET /payment/{id}` · la API no expone PATCH ni DELETE
+- **Health:** `GET /`
+
+El usuario se hidrata con `GET /users/me` después del login.
 
 **Roles:** `admin`, `profesor`, `cliente`. Las rutas se protegen con `RequireAuth`
-y `RequireRole`; el menú se filtra por rol (`config/nav.ts`).
+y `RequireRole`; el menú se filtra por rol (`config/nav.ts`). El RBAC del front es
+solo UX: la autoridad real es el backend.
 
 **Manejo de errores:** 401 (sesión expirada → logout global), 403 (acceso denegado),
 404, 409 y 422 se traducen a mensajes en español.
@@ -97,17 +106,37 @@ y `RequireRole`; el menú se filtra por rol (`config/nav.ts`).
 
 ## 🖥️ Rutas
 
-| Ruta          | Acceso                          |
-| ------------- | ------------------------------- |
-| `/`           | Público (login / registro)      |
-| `/login`      | Público (login / registro)      |
-| `/dashboard`  | Autenticado                     |
-| `/usuarios`   | admin, profesor                 |
-| `/ejercicios` | admin, profesor                 |
-| `/rutinas`    | admin, profesor, cliente        |
-| `/mi-perfil`  | cliente                         |
-| `/pagos`      | admin                           |
-| `*`           | 404                             |
+| Ruta                     | Acceso                     |
+| ------------------------ | -------------------------- |
+| `/`                      | Público (login / registro) |
+| `/login`                 | Público (login / registro) |
+| `/dashboard`             | Autenticado                |
+| `/usuarios`              | admin, profesor            |
+| `/ejercicios`            | admin, profesor            |
+| `/rutinas`               | admin, profesor, cliente   |
+| `/rutinas/:id`           | admin, profesor, cliente   |
+| `/perfiles-deportivos`   | admin                      |
+| `/pagos`                 | admin                      |
+| `/mi-perfil`             | cliente                    |
+| `/mi-perfil-deportivo`   | cliente                    |
+| `/mi-membresia`          | cliente                    |
+| `*`                      | 404                        |
+
+---
+
+## 🚧 Estado y despliegue
+
+**Al 2026-11-09 el proyecto no está desplegado:** la API y el front corren solo en local.
+
+- Funcionalidad del MVP: fases 0–11 completas (auth, socios, ejercicios, rutinas, perfiles deportivos, pagos y membresía) para los roles admin, profesor y cliente.
+- Verificación local: `npm run lint`, `npm run typecheck`, `npm test` (175 tests en 35 archivos) y `npm run build` en verde. El bundle ronda los 793 kB (229 kB gzip) y Vite avisa por tamaño; no hay code-splitting todavía.
+- Pendiente antes de publicar:
+  - [ ] Desplegar `GymApi` y configurar `CORS` con el origen real del front.
+  - [ ] Compilar el front con `VITE_API_BASE_URL` apuntando a la API publicada y servirlo con fallback de SPA a `index.html` (se usa `BrowserRouter`).
+  - [ ] Smoke test de los tres roles contra la API real: login, mi perfil, asignar rol, alta de pago, rutina y membresía.
+  - [ ] Fase 12: paginación, orden y búsqueda server-side; toasts de mutación y optimistic updates.
+  - [ ] Commitear el trabajo de la auditoría 2026-11-04 (etapas A–D).
+- Limitaciones conocidas: sin CI ni hooks pre-commit, sin ErrorBoundary global, sin refresh token y con el token en `localStorage`.
 
 ---
 

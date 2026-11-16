@@ -42,18 +42,14 @@ export function StaffRoutinesView() {
     }) ?? []
 
   async function handleCreate(payload: RoutineCreate) {
-    try {
-      const created = await createRoutine.mutateAsync(payload)
-      toast.success('Rutina creada')
-      setFormOpen(false)
-      // La rutina nace vacía: seguimos en el detalle con el formulario
-      // de ejercicios abierto para completar el flujo de carga.
-      navigate(`/rutinas/${created.id}`, {
-        state: { openExerciseForm: true },
-      })
-    } catch (err) {
-      toast.error(getErrorMessage(err))
-    }
+    const created = await createRoutine.mutateAsync(payload)
+    toast.success('Rutina creada')
+    setFormOpen(false)
+    // La rutina nace vacía: seguimos en el detalle con el formulario
+    // de ejercicios abierto para completar el flujo de carga.
+    navigate(`/rutinas/${created.id}`, {
+      state: { openExerciseForm: true },
+    })
   }
 
   async function handleToggleState(routine: Routine) {

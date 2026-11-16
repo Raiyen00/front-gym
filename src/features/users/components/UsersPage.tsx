@@ -9,16 +9,19 @@ import { UserFormDialog } from '@/features/users/components/UserFormDialog'
 import { UserCreateDialog } from '@/features/users/components/UserCreateDialog'
 import { DeleteUserDialog } from '@/features/users/components/DeleteUserDialog'
 import { UserDetailDialog } from '@/features/users/components/UserDetailDialog'
+import { AssignRoleDialog } from '@/features/users/components/AssignRoleDialog'
 import {
   useUsers,
   useCreateUser,
   useUpdateUser,
+  useUpdateUserRol,
   useEnableUser,
   useDeleteUser,
 } from '@/features/users/queries'
 import { useAuth } from '@/features/auth/useAuth'
 import { getErrorMessage } from '@/features/auth/utils'
 import type { User, UserCreate, UserUpdate } from '@/types/user'
+import type { Rol } from '@/types/enums'
 
 export function UsersPage() {
   const { user } = useAuth()
@@ -27,11 +30,13 @@ export function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
+  const [roleUser, setRoleUser] = useState<User | null>(null)
   const [viewingUserId, setViewingUserId] = useState<number | null>(null)
 
   const isAdmin = user?.rol === 'admin'
   const createUser = useCreateUser()
   const updateUser = useUpdateUser(editingUser?.id ?? 0)
+  const updateUserRol = useUpdateUserRol()
   const enableUser = useEnableUser()
   const deleteUser = useDeleteUser()
 
@@ -55,6 +60,17 @@ export function UsersPage() {
       await updateUser.mutateAsync(data)
       toast.success('Socio actualizado')
       setEditingUser(null)
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }
+
+  async function handleAssignRole(rol: Rol) {
+    if (!roleUser) return
+    try {
+      const updated = await updateUserRol.mutateAsync({ id: roleUser.id, rol })
+      toast.success(`Rol de ${updated.name} ${updated.lastname} actualizado`)
+      setRoleUser(null)
     } catch (err) {
       toast.error(getErrorMessage(err))
     }
@@ -147,8 +163,10 @@ export function UsersPage() {
         <UsersTable
           users={filteredUsers}
           canManage={isAdmin}
+          currentUserId={user?.id}
           onView={(u) => setViewingUserId(u.id)}
           onEdit={setEditingUser}
+          onAssignRole={setRoleUser}
           onEnable={handleEnable}
           onDelete={setDeletingUser}
         />
@@ -181,6 +199,16 @@ export function UsersPage() {
         isPending={createUser.isPending}
         onSubmit={handleCreate}
         onOpenChange={setCreateOpen}
+      />
+
+      <AssignRoleDialog
+        key={roleUser?.id ?? 'none'}
+        user={roleUser}
+        isPending={updateUserRol.isPending}
+        onSubmit={handleAssignRole}
+        onOpenChange={(open) => {
+          if (!open) setRoleUser(null)
+        }}
       />
 
       <DeleteUserDialog

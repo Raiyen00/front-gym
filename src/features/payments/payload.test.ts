@@ -20,7 +20,7 @@ describe('payments payload', () => {
       user_id: 7,
       amount: 1500.5,
       payment_method: 'transferencia',
-      expiration_date: '2026-12-31T00:00:00',
+      expiration_date: '2026-12-31T23:59:59',
     })
   })
 

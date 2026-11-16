@@ -1,7 +1,7 @@
 import { queryKeys } from '@/lib/api/queryKeys'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as usersApi from '@/features/users/api'
-import type { UserCreate, UserUpdate } from '@/types/user'
+import type { UserCreate, UserRolUpdate, UserUpdate } from '@/types/user'
 
 export function useUsers() {
   return useQuery({
@@ -36,6 +36,33 @@ export function useUpdateUser(id: number) {
     mutationFn: (data: UserUpdate) => usersApi.updateUser(id, data),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(queryKeys.users.detail(id), updatedUser)
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all })
+    },
+  })
+}
+
+/** Edición del perfil propio vía `PATCH /users/me` (disponible para todos los roles). */
+export function useUpdateMe() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: UserUpdate) => usersApi.updateMe(data),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(queryKeys.users.detail(updatedUser.id), updatedUser)
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all })
+    },
+  })
+}
+
+/** Cambio de rol de un socio (solo admin). */
+export function useUpdateUserRol() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, rol }: { id: number; rol: UserRolUpdate['rol'] }) =>
+      usersApi.updateUserRol(id, rol),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(queryKeys.users.detail(updatedUser.id), updatedUser)
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all })
     },
   })
