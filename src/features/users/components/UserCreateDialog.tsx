@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { Loader2, UserPlus } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { AlertTriangle, Loader2, UserPlus } from 'lucide-react'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Dialog,
   DialogContent,
@@ -26,11 +27,14 @@ import {
   userCreateSchema,
   type UserCreateFormValues,
 } from '@/features/users/schema'
-import type { UserCreate } from '@/types/user'
+import { findInactiveUserByEmail } from '@/features/users/createSupport'
+import type { User, UserCreate } from '@/types/user'
 
 interface UserCreateDialogProps {
   open: boolean
   isPending: boolean
+  /** Lista de socios ya cargada: sirve para avisar si el email es de una baja. */
+  users?: User[]
   onSubmit: (data: UserCreate) => Promise<void>
   onOpenChange: (open: boolean) => void
 }
@@ -48,6 +52,7 @@ const EMPTY_VALUES: UserCreateFormValues = {
 export function UserCreateDialog({
   open,
   isPending,
+  users,
   onSubmit,
   onOpenChange,
 }: UserCreateDialogProps) {
@@ -59,6 +64,11 @@ export function UserCreateDialog({
   useEffect(() => {
     if (open) form.reset(EMPTY_VALUES)
   }, [open, form])
+
+  // Un email que ya pertenece a un socio dado de baja: conviene reactivarlo en
+  // la lista en vez de crear una cuenta nueva (la API respondería 409).
+  const email = useWatch({ control: form.control, name: 'email' })
+  const inactiveMatch = findInactiveUserByEmail(users, email)
 
   async function handleSubmit(values: UserCreateFormValues) {
     const payload: UserCreate = {
@@ -185,6 +195,17 @@ export function UserCreateDialog({
                 </FormItem>
               )}
             />
+
+            {inactiveMatch && (
+              <Alert variant="warning">
+                <AlertTriangle />
+                <AlertDescription>
+                  Ya existe un socio dado de baja con ese email (
+                  {inactiveMatch.name} {inactiveMatch.lastname}). Cerrá este
+                  formulario y tocá "Habilitar" en la lista para reactivarlo.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
               <FormField

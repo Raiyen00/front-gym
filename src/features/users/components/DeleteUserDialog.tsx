@@ -30,11 +30,11 @@ export function DeleteUserDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="size-5 text-destructive" />
-            Eliminar socio
+            Dar de baja
           </DialogTitle>
           <DialogDescription>
             {user
-              ? `¿Seguro que querés eliminar a ${user.name} ${user.lastname}? Esta acción no se puede deshacer.`
+              ? `¿Seguro que querés dar de baja a ${user.name} ${user.lastname}? El socio no va a poder operar, pero su historial se conserva y podés reactivarlo desde la lista con "Habilitar".`
               : ''}
           </DialogDescription>
         </DialogHeader>
@@ -52,12 +52,12 @@ export function DeleteUserDialog({
             {isPending ? (
               <>
                 <Loader2 className="size-3.5 animate-spin mr-2" />
-                Eliminando...
+                Dando de baja...
               </>
             ) : (
               <>
                 <Trash2 className="size-3.5 mr-2" />
-                Eliminar
+                Dar de baja
               </>
             )}
           </Button>

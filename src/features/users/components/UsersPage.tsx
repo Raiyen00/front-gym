@@ -20,6 +20,7 @@ import {
 } from '@/features/users/queries'
 import { useAuth } from '@/features/auth/useAuth'
 import { getErrorMessage } from '@/features/auth/utils'
+import { getCreateUserErrorMessage } from '@/features/users/createSupport'
 import type { User, UserCreate, UserUpdate } from '@/types/user'
 import type { Rol } from '@/types/enums'
 
@@ -50,7 +51,7 @@ export function UsersPage() {
       toast.success('Socio creado. Queda pendiente de habilitación.')
       setCreateOpen(false)
     } catch (err) {
-      toast.error(getErrorMessage(err))
+      toast.error(getCreateUserErrorMessage(err))
     }
   }
 
@@ -89,7 +90,7 @@ export function UsersPage() {
     if (!deletingUser) return
     try {
       await deleteUser.mutateAsync(deletingUser.id)
-      toast.success('Socio eliminado')
+      toast.success('Socio dado de baja')
       setDeletingUser(null)
     } catch (err) {
       toast.error(getErrorMessage(err))
@@ -197,6 +198,7 @@ export function UsersPage() {
       <UserCreateDialog
         open={createOpen}
         isPending={createUser.isPending}
+        users={users}
         onSubmit={handleCreate}
         onOpenChange={setCreateOpen}
       />

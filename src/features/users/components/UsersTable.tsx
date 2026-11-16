@@ -164,7 +164,7 @@ export function UsersTable({
                       <DropdownMenuSeparator />
                       <DropdownMenuItem variant="destructive" onClick={() => onDelete(user)}>
                         <Trash2 className="size-4" />
-                        Eliminar
+                        Dar de baja
                       </DropdownMenuItem>
                     </>
                   )}
