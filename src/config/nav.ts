@@ -84,14 +84,14 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Mi perfil',
     to: '/mi-perfil',
     icon: UserCog,
-    allowedRoles: ['cliente'],
+    allowedRoles: ['cliente', 'profesor'],
     section: 'cuenta',
   },
   {
     label: 'Mi perfil deportivo',
     to: '/mi-perfil-deportivo',
     icon: HeartPulse,
-    allowedRoles: ['cliente'],
+    allowedRoles: ['cliente', 'profesor'],
     section: 'cuenta',
   },
   {

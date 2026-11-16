@@ -81,7 +81,7 @@ describe('SportProfileFormDialog (alta)', () => {
       ],
     )
 
-    const select = await screen.findByRole('combobox', { name: 'Socio' })
+    const select = await screen.findByRole('combobox', { name: 'Socio o profesor' })
     await waitFor(() => expect(select).toBeEnabled())
     await user.click(select)
 
@@ -99,9 +99,11 @@ describe('SportProfileFormDialog (alta)', () => {
     ])
 
     expect(
-      await screen.findByText(/No hay socios habilitados para entrenar/),
+      await screen.findByText(/No hay socios ni profesores habilitados para entrenar/),
     ).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Socio' })).toBeDisabled()
+    expect(
+      screen.getByRole('combobox', { name: 'Socio o profesor' }),
+    ).toBeDisabled()
   })
 })
 

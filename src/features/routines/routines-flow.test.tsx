@@ -212,7 +212,7 @@ describe('flujo de rutinas', () => {
     await screen.findByRole('heading', { name: 'Rutinas' })
     await user.click(screen.getByRole('button', { name: 'Nueva rutina' }))
 
-    await user.click(screen.getByRole('combobox', { name: 'Socio' }))
+    await user.click(screen.getByRole('combobox', { name: 'Socio o profesor' }))
     await user.click(await screen.findByRole('option', { name: /Ana Gómez/ }))
     await user.click(screen.getByRole('button', { name: 'Crear rutina' }))
 
@@ -271,7 +271,7 @@ describe('flujo de rutinas', () => {
 
     await screen.findByRole('heading', { name: 'Rutinas' })
     await user.click(screen.getByRole('button', { name: 'Nueva rutina' }))
-    await user.click(screen.getByRole('combobox', { name: 'Socio' }))
+    await user.click(screen.getByRole('combobox', { name: 'Socio o profesor' }))
 
     expect(
       await screen.findByRole('option', { name: /Ana Gómez/ }),

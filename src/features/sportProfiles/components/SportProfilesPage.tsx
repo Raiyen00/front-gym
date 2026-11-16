@@ -133,7 +133,7 @@ export function SportProfilesPage() {
             Perfiles deportivos
           </h1>
           <p className="mt-1 text-[0.8125rem] text-muted-foreground">
-            Objetivos, nivel y seguimiento de entrenamiento por socio.
+            Objetivos, nivel y seguimiento de entrenamiento por socio o profesor.
           </p>
         </div>
         <Button onClick={openCreate}>
